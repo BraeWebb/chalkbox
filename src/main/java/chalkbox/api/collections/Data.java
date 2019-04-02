@@ -57,6 +57,20 @@ public class Data {
     }
 
     /**
+     * Return a boolean value at key, if key doesn't hold a boolean returns false.
+     *
+     * @param key The key to search for
+     * @return true if key holds a value true boolean value
+     */
+    public boolean is(String key) {
+        Object value = get(key);
+        if (value instanceof Boolean) {
+            return (boolean) value;
+        }
+        return false;
+    }
+
+    /**
      * Get a value stored at the given key
      *
      * @param key The key to lookup
