@@ -1,5 +1,6 @@
 package chalkbox.api;
 
+import chalkbox.api.annotations.Asset;
 import chalkbox.api.annotations.Collector;
 import chalkbox.api.annotations.DataSet;
 import chalkbox.api.annotations.Parser;
@@ -145,12 +146,21 @@ public class ChalkBox {
             executeProcess(dependency, args);
         }
 
+        List<Method> assets = methodsByAnnotation(processorClass, Asset.class);
         List<Method> pipes = methodsByAnnotation(processorClass, Pipe.class);
 
         Object instance = initClass(processorClass);
         if (instance == null) {
             hasError = true;
             return;
+        }
+
+        for (Method asset : assets) {
+            try {
+                asset.invoke(instance, new Object[]{args});
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         for (Method pipe : pipes) {
