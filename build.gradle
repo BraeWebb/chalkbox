@@ -14,4 +14,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     // Library for JSON
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+    // Command line argument parsing
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }

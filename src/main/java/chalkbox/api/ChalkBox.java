@@ -13,6 +13,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,32 +46,55 @@ public class ChalkBox {
     public void run(String collectorParams, String processorParams) {
         if (!hasError) {
             executeCollection(collector, collectorParams.split(" "));
+        }
+
+        if (!hasError) {
             executeProcess(processor, processorParams.split(" "));
         }
     }
 
+    private List<Method> methodsByAnnotation(Class clazz,
+                                             Class<? extends Annotation> annotation) {
+        List<Method> methods = new ArrayList<>();
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(annotation)) {
+                methods.add(method);
+            }
+        }
+        return methods;
+    }
+
+    // TODO add helpful error messages for each thing that can go wrong
+    private Object initClass(Class<?> clazz) {
+        Object instance = null;
+        try {
+            instance = clazz.getConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        return instance;
+    }
+
     public void executeCollection(Class collectorClass, String[] args) {
         if (!collectorClass.isAnnotationPresent(Collector.class)) {
+            hasError = true;
             System.err.println("Collector class does not have @Collector annotation");
             return;
         }
 
-        List<Method> parsers = new ArrayList<>();
-        List<Method> collectors = new ArrayList<>();
-        for (Method method : collectorClass.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(DataSet.class)) {
-                collectors.add(method);
-            }
-            if (method.isAnnotationPresent(Parser.class)) {
-                parsers.add(method);
-            }
-        }
+        List<Method> parsers = methodsByAnnotation(collectorClass, Parser.class);
+        List<Method> collectors = methodsByAnnotation(collectorClass, DataSet.class);
 
-        Object instance;
-        try {
-            instance = collectorClass.getConstructor().newInstance();
-        } catch (Exception e) {
-            System.err.println(e);
+        Object instance = initClass(collectorClass);
+        if (instance == null) {
+            hasError = true;
             return;
         }
 
@@ -77,9 +102,14 @@ public class ChalkBox {
             try {
                 Object result = parser.invoke(instance, new Object[]{args});
                 System.out.println(result);
-            } catch (Exception e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
-                System.err.println(e);
+                hasError = true;
+                return;
+            } catch (InvocationTargetException e) {
+                e.getTargetException().printStackTrace();
+                hasError = true;
+                return;
             }
         }
 
@@ -115,18 +145,11 @@ public class ChalkBox {
             executeProcess(dependency, args);
         }
 
-        List<Method> pipes = new ArrayList<>();
-        for (Method method : processorClass.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(Pipe.class)) {
-                pipes.add(method);
-            }
-        }
+        List<Method> pipes = methodsByAnnotation(processorClass, Pipe.class);
 
-        Object instance;
-        try {
-            instance = processorClass.getConstructor().newInstance();
-        } catch (Exception e) {
-            System.err.println(e);
+        Object instance = initClass(processorClass);
+        if (instance == null) {
+            hasError = true;
             return;
         }
 
@@ -140,7 +163,7 @@ public class ChalkBox {
                     System.out.println(result);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.err.println(e);
+                    System.err.println(e.toString());
                 }
             }
         }
