@@ -15,7 +15,7 @@ public class Execution {
      * @return the executed process
      * @throws IOException if an issue occurs executing the process
      */
-    private static Process runProcess(File working, String... args)
+    public static Process runProcess(File working, String... args)
             throws IOException {
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.directory(working);
@@ -39,7 +39,7 @@ public class Execution {
      * @return the executed process
      * @throws IOException if an issue occurs executing the process
      */
-    private static Process runProcess(String... args) throws IOException {
+    public static Process runProcess(String... args) throws IOException {
         return runProcess(new File("."), args);
     }
 }
