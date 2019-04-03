@@ -7,7 +7,7 @@ import java.io.IOException;
  * A collection contains a folder bundle, associated metadata and result data
  */
 public class Collection {
-    private Bundle bundle;
+    private Bundle source;
     private Bundle working;
     private Data results;
 
@@ -23,12 +23,12 @@ public class Collection {
             System.err.println("Fatal Error: Unable to create working directory");
             System.exit(2);
         }
-        this.bundle = new Bundle(new File(metadata.get("root").toString()));
+        this.source = new Bundle(new File(metadata.get("root").toString()));
         this.results = metadata;
     }
 
-    public Bundle getBundle() {
-        return bundle;
+    public Bundle getSource() {
+        return source;
     }
 
     public Bundle getWorking() {
@@ -41,6 +41,6 @@ public class Collection {
 
     @Override
     public String toString() {
-        return results.toString() + " " + bundle.toString() + " " + working.toString();
+        return results.toString() + " " + source.toString() + " " + working.toString();
     }
 }

@@ -22,6 +22,18 @@ public class Data {
     }
 
     /**
+     * Construct a new data collection from a JSON string
+     */
+    public Data(String json) {
+        JSONParser parser = new JSONParser();
+        try {
+            this.json = (JSONObject) parser.parse(json);
+        } catch (ParseException pe) {
+            this.json = new JSONObject();
+        }
+    }
+
+    /**
      * Construct a data collection that is a copy of the parameter
      *
      * @param data The data to copy
