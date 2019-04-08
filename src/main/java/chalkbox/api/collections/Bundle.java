@@ -65,6 +65,16 @@ public class Bundle {
         return new Bundle(new File(folder.getPath() + File.separator + path));
     }
 
+    public List<String> getClasses(String sourceRoot) {
+        Bundle sources = getBundle(sourceRoot);
+        List<String> classes = new ArrayList<>();
+        for (String filename : sources.getFileNames(".java")) {
+            classes.add(filename.replace(".java", "")
+                    .replace(File.separator, "."));
+        }
+        return classes;
+    }
+
     public SourceFile[] getFiles() throws IOException {
         return getFiles("");
     }
@@ -88,6 +98,10 @@ public class Bundle {
 
         File file = new File(this.folder + File.separator + uri);
         return new FileSourceFile(uri, file);
+    }
+
+    public String getUnmaskedPath() {
+        return this.folder.getPath();
     }
 
     public String getUnmaskedPath(String uri) {
