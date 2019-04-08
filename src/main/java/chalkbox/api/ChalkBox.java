@@ -95,6 +95,9 @@ public class ChalkBox {
         BufferedReader reader = new BufferedReader(new FileReader(path));
         String line = reader.readLine();
         while (line != null) {
+            if (line.startsWith("#")) {
+                continue;
+            }
             String[] parts = line.split("=", 2);
             if (parts.length == 2) {
                 config.put(parts[0], parts[1]);
@@ -204,20 +207,9 @@ public class ChalkBox {
 
         for (Method pipe : pipes) {
             String stream = pipe.getAnnotation(Pipe.class).stream();
-            List<Object> updated = new ArrayList<>();
             List<Object> data = streams.get(stream);
 
-            for (Object item : data) {
-                try {
-                    Object result = pipe.invoke(instance, item);
-                    updated.add(result);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println(e.toString());
-                }
-            }
-
-            streams.put(stream, updated);
+            streams.put(stream, ProcessRunner.executeProcess(data, instance, pipe));
         }
     }
 
