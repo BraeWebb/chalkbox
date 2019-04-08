@@ -51,17 +51,26 @@ public class Bundle {
         return new ArrayList<>(files);
     }
 
-    public SourceFile[] getFiles() throws IOException {
-        return getFiles("");
-    }
-
-    public SourceFile[] getFiles(String extension) throws IOException {
+    public List<String> getFileNames(String extension) {
         List<String> filenames = new ArrayList<>();
         for (String filename : files) {
             if (filename.endsWith(extension)) {
                 filenames.add(filename);
             }
         }
+        return filenames;
+    }
+
+    public Bundle getBundle(String path) {
+        return new Bundle(new File(folder.getPath() + File.separator + path));
+    }
+
+    public SourceFile[] getFiles() throws IOException {
+        return getFiles("");
+    }
+
+    public SourceFile[] getFiles(String extension) throws IOException {
+        List<String> filenames = getFileNames(extension);
 
         SourceFile[] sources = new SourceFile[filenames.size()];
 
