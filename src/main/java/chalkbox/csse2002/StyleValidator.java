@@ -4,18 +4,19 @@ import chalkbox.api.annotations.Asset;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
-import chalkbox.api.collections.Data;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * A process for reading .style files into the JSON submission as grades.
+ * A process for validating the format of .style files.
  *
  * <p>The .style file is used for marking style in CSSE2002, an example file
  * is demonstrated below.
@@ -31,38 +32,15 @@ import java.util.regex.Pattern;
  * General Comments:
  * Any extra comments should be ignored
  * </pre>
- *
- * <p>The above file would translate to the following format (where ... contains
- * the full file above).
- * <pre>
- * "style": {
- *      "raw": "...",
- *      "marks": {
- *          "Naming": 2,
- *          "Structure and layout": 2.5,
- *          "Good OO": 5,
- *          "Commenting": 2
- *      },
- *      "total": {
- *          "Naming": 10,
- *          "Structure and layout": 8,
- *          "Good OO": 5,
- *          "Commenting": 4
- *      }
- * }
- * </pre>
  */
 @Processor
-public class Style {
-    /** Horrific Regex pattern for detecting mark categories
-     *
-     * <p>Searches for the pattern:
-     * <pre>\n ANY_TOKENS COMMA WHITESPACE|NOTHING float|int FORWARD_SLASH int \n</pre>
-     */
-    public static final Pattern STYLE_PATTERN = Pattern.compile("(?:\\n|^)*([^\\n:]+):\\s*([0-9]*[.]*[0-9])\\s*\\/\\s*([0-9]*)\\n");
+public class StyleValidator {
 
     /** Root directory of style files. Directory should include .style files in top level */
     private String styleRoot;
+
+    /** All the expected style categories in the style file */
+    private String[] categories;
 
     /**
      * Loads the style root configuration from the config file.
@@ -73,6 +51,7 @@ public class Style {
     @Asset
     public void loadRoot(Map<String, String> config) {
         styleRoot = config.get("style");
+        categories = config.get("styleCategories").split("\\|");
     }
 
     /**
@@ -86,23 +65,32 @@ public class Style {
      */
     @Pipe(stream = "submissions")
     public Collection readStyle(Collection collection) {
-        Data data = collection.getResults();
-        String stylePath = styleRoot + File.separator + data.get("sid") + ".style";
+        String sid = (String) collection.getResults().get("sid");
+        String stylePath = styleRoot + File.separator + sid + ".style";
 
+        /* Attempt to open the style file */
         String style;
         try {
             style = new String(Files.readAllBytes(Paths.get(stylePath)));
         } catch (IOException e) {
-            System.err.println("Missing style file for " + data.get("sid"));
+            System.err.println("Missing style file for " + sid);
             return collection;
         }
-        data.set("style.raw", style);
 
-        Matcher matcher = STYLE_PATTERN.matcher(style);
+        /* Build a set of all the correctly formatted style categories */
+        Set<String> foundCategories = new HashSet<>();
+        Matcher matcher = Style.STYLE_PATTERN.matcher(style);
         while (matcher.find()) {
-            String category = matcher.group(1).trim();
-            float result = Float.parseFloat(matcher.group(2).trim());
-            data.set("style.marks." + category, result);
+            foundCategories.add(matcher.group(1).trim());
+        }
+
+        Set<String> expectedCategories = new HashSet<>(Arrays.asList(categories));
+        /* goodFormat is true if the found categories in a file match the
+         * categories expected */
+        boolean goodFormat = foundCategories.equals(expectedCategories);
+        if (!goodFormat) {
+            System.err.println(sid + " is missing grades for categories:");
+            System.err.println(style);
         }
 
         return collection;
