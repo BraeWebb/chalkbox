@@ -9,8 +9,10 @@ import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,7 +29,13 @@ public class ChalkBox {
     private Map<String, String> config = new HashMap<>();
     private boolean hasError;
 
+    /**
+     * Construct a new ChalkBox instance based on the configuration file.
+     *
+     * @param configuration Path to a chalkbox configuration file.
+     */
     public ChalkBox(String configuration) {
+        /* Attempt to read the configuration file */
         try {
             loadConfig(configuration);
         } catch (IOException e) {
@@ -36,6 +44,7 @@ public class ChalkBox {
             return;
         }
 
+        /* Ensure that all the required classes are defined */
         for (String clazz : new String[]{"collector", "processor", "output"}) {
             if (!config.containsKey(clazz)) {
                 System.err.println("Configuration has no " + clazz + " class");
@@ -44,25 +53,31 @@ public class ChalkBox {
             }
         }
 
-        try {
-            this.collector = Class.forName(config.get("collector"));
-        } catch (ClassNotFoundException cnf) {
-            System.err.println("Unable to find collector class: " + collector);
-            hasError = true;
-        }
+        this.collector = loadClass("collector");
+        this.processor = loadClass("processor");
+        this.output = loadClass("output");
+    }
 
+    /**
+     * Load a class based on the name of the class in the config file.
+     *
+     * For example, with config file demonstrated below
+     * <pre>
+     * myClass=package.MyClass
+     * </pre>
+     * The method call {@code loadClass("myClass")} would load the class
+     * {@code package.MyClass}.
+     *
+     * @param classConfig The configuration option to look for.
+     * @return The loaded Class object.
+     */
+    private Class loadClass(String classConfig) {
         try {
-            this.processor = Class.forName(config.get("processor"));
+            return Class.forName(config.get(classConfig));
         } catch (ClassNotFoundException cnf) {
-            System.err.println("Unable to find collector class: " + processor);
-            hasError = true;
-        }
-
-        try {
-            this.output = Class.forName(config.get("output"));
-        } catch (ClassNotFoundException cnf) {
-            System.err.println("Unable to find output class: " + processor);
-            hasError = true;
+            System.err.println("Unable to find " + classConfig + " class: "
+                    + config.get(classConfig));
+            return null;
         }
     }
 
@@ -222,14 +237,23 @@ public class ChalkBox {
             return;
         }
 
+        PrintStream outFile;
+        try {
+            outFile = new PrintStream(new FileOutputStream("./sample/hardcoded"));
+        } catch (IOException e) {
+            System.err.println("Unable to open output stream");
+            return;
+        }
+
         for (Method output : outputs) {
             String stream = output.getAnnotation(Output.class).stream();
             try {
-                output.invoke(instance, System.out, streams.get(stream));
+                output.invoke(instance, outFile, streams.get(stream));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        outFile.close();
     }
 
     public static void main(String[] args) {
@@ -238,7 +262,7 @@ public class ChalkBox {
             return;
         }
 
-        ChalkBox run = new ChalkBox(args[0]);
-        run.run();
+        ChalkBox box = new ChalkBox(args[0]);
+        box.run();
     }
 }
