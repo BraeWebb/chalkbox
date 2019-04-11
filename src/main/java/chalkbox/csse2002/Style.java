@@ -1,6 +1,6 @@
 package chalkbox.csse2002;
 
-import chalkbox.api.annotations.Asset;
+import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,21 +58,12 @@ public class Style {
      * <p>Searches for the pattern:
      * <pre>\n ANY_TOKENS COMMA WHITESPACE|NOTHING float|int FORWARD_SLASH int \n</pre>
      */
-    public static final Pattern STYLE_PATTERN = Pattern.compile("(?:\\n|^)*([^\\n:]+):\\s*([0-9]*[.]*[0-9])\\s*\\/\\s*([0-9]*)\\n");
+    static final Pattern STYLE_PATTERN = Pattern.compile("(?:\\n|^)*([^\\n:]+):\\s*([0-9]*[.]*[0-9])\\s*\\/\\s*([0-9]*)\\n");
 
     /** Root directory of style files. Directory should include .style files in top level */
+    @ConfigItem(key = "style",
+                description = "Root directory of style files. Top level should have only .style files")
     private String styleRoot;
-
-    /**
-     * Loads the style root configuration from the config file.
-     *
-     * TODO: This should be converted into a field annotation
-     * @param config
-     */
-    @Asset
-    public void loadRoot(Map<String, String> config) {
-        styleRoot = config.get("style");
-    }
 
     /**
      * Read a style file into the JSON format described in the {@link Style}

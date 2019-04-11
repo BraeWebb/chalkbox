@@ -1,6 +1,7 @@
 package chalkbox.csse2002;
 
 import chalkbox.api.annotations.Asset;
+import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
@@ -37,34 +38,34 @@ import java.util.regex.Matcher;
 public class StyleValidator {
 
     /** Root directory of style files. Directory should include .style files in top level */
-    private String styleRoot;
+    @ConfigItem(key = "style",
+                description = "Root directory of style files. Top level should have only .style files")
+    public String styleRoot;
+
+    /** The expected categories separated by a pipe (|) */
+    @ConfigItem(description = "The expected style categories separated by a pipe (|)")
+    public String styleCategories;
 
     /** All the expected style categories in the style file */
     private String[] categories;
 
-    /**
-     * Loads the style root configuration from the config file.
-     *
-     * TODO: This should be converted into a field annotation
-     * @param config
-     */
+    /** Split the style categories based on the pipe symbol */
     @Asset
-    public void loadRoot(Map<String, String> config) {
-        styleRoot = config.get("style");
-        categories = config.get("styleCategories").split("\\|");
+    public void separateCategories(Map<String, String> config) {
+        categories = styleCategories.split("\\|");
     }
 
     /**
      * Read a style file into the JSON format described in the {@link Style}
      * documentation.
      *
-     * Looks for a file in {@link Style#styleRoot}/{sid}.style
+     * Looks for a file in {@link StyleValidator#styleRoot}/{sid}.style
      *
      * @param collection A submission to read.
      * @return The submission.
      */
     @Pipe(stream = "submissions")
-    public Collection readStyle(Collection collection) {
+    public Collection validate(Collection collection) {
         String sid = (String) collection.getResults().get("sid");
         String stylePath = styleRoot + File.separator + sid + ".style";
 

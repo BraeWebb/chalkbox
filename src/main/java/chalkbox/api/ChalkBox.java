@@ -2,6 +2,7 @@ package chalkbox.api;
 
 import chalkbox.api.annotations.Asset;
 import chalkbox.api.annotations.Collector;
+import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.DataSet;
 import chalkbox.api.annotations.Output;
 import chalkbox.api.annotations.Parser;
@@ -14,7 +15,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 
 public class ChalkBox {
+    private static final String USAGE = "Incorrect usage:" + System.lineSeparator()
+            + "\tchalkbox <box file>" + System.lineSeparator()
+            + "\tchalkbox help <class>";
+
     private Map<String, List<Object>> streams = new HashMap<>();
     private Class collector;
     private Class processor;
@@ -56,6 +63,43 @@ public class ChalkBox {
         this.collector = loadClass("collector");
         this.processor = loadClass("processor");
         this.output = loadClass("output");
+
+        validateConfigItems(collector);
+        validateConfigItems(processor);
+        validateConfigItems(output);
+    }
+
+    /**
+     * Validate that the config file has all of the required config items.
+     *
+     * Checks that all of the {@link ConfigItem} annotations which are required
+     * have a value in the config file.
+     *
+     * @param clazz The class to search for {@link ConfigItem}'s within.
+     */
+    private void validateConfigItems(Class clazz) {
+        for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
+            ConfigItem annotation = field.getAnnotation(ConfigItem.class);
+
+            /* Only focus on required config items */
+            if (!annotation.required()) {
+                continue;
+            }
+
+            /* Get the key of the config item */
+            String key = annotation.key();
+            if (key.isEmpty()) {
+                key = field.getName();
+            }
+
+            /* Print an error if the key is missing */
+            if (!config.containsKey(key)) {
+                System.err.println("Config file missing value for "
+                        + key + " required by " + clazz.getName());
+                System.err.println(key + ": " + annotation.description());
+                hasError = true;
+            }
+        }
     }
 
     /**
@@ -95,8 +139,8 @@ public class ChalkBox {
         }
     }
 
-    private List<Method> methodsByAnnotation(Class clazz,
-                                             Class<? extends Annotation> annotation) {
+    private static List<Method> methodsByAnnotation(Class clazz,
+                                                    Class<? extends Annotation> annotation) {
         List<Method> methods = new ArrayList<>();
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.isAnnotationPresent(annotation)) {
@@ -106,11 +150,23 @@ public class ChalkBox {
         return methods;
     }
 
+    private static List<Field> fieldsByAnnotation(Class clazz,
+                                                  Class<? extends Annotation> annotation) {
+        List<Field> fields = new ArrayList<>();
+        for (Field field : clazz.getFields()) {
+            if (field.isAnnotationPresent(annotation)) {
+                fields.add(field);
+            }
+        }
+        return fields;
+    }
+
     private void loadConfig(String path) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(path));
         String line = reader.readLine();
         while (line != null) {
             if (line.startsWith("#")) {
+                line = reader.readLine();
                 continue;
             }
             String[] parts = line.split("=", 2);
@@ -135,6 +191,21 @@ public class ChalkBox {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        }
+
+        for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
+            ConfigItem annotation = field.getAnnotation(ConfigItem.class);
+
+            String key = annotation.key();
+            if (key.isEmpty()) {
+                key = field.getName();
+            }
+
+            try {
+                field.set(instance, config.get(key));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
 
         return instance;
@@ -256,9 +327,46 @@ public class ChalkBox {
         outFile.close();
     }
 
+    public static String classHelp(String className) {
+        StringBuilder builder = new StringBuilder();
+        Class clazz;
+        try {
+            clazz = Class.forName(className);
+        } catch (ClassNotFoundException cnf) {
+            return "Unable to find class: " + className;
+        }
+
+        for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
+            ConfigItem annotation = field.getAnnotation(ConfigItem.class);
+
+            /* Get the key of the config item */
+            String key = annotation.key();
+            if (key.isEmpty()) {
+                key = field.getName();
+            }
+
+            builder.append(key).append(": ").append(annotation.description())
+                    .append(System.lineSeparator());
+        }
+
+        return builder.toString();
+    }
+
     public static void main(String[] args) {
+        if (args.length == 2) {
+            if (!args[0].equals("help")) {
+                System.err.println(USAGE);
+                return;
+            }
+
+            System.out.println("Config Items for " + args[1]);
+            System.out.println();
+            System.out.println(classHelp(args[1]));
+            return;
+        }
+
         if (args.length != 1) {
-            System.err.println("Incorrect usage: chalkbox <box file>");
+            System.err.println(USAGE);
             return;
         }
 
