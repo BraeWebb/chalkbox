@@ -6,11 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An annotation for {@link Processor} method which prepares an asset.
+ * An annotation for a method that is executed once for a class prior to
+ * any other class methods.
  *
- * Asset methods are executed once globally.
+ * The method is given a mapping of strings to strings which represents
+ * the configuration file.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Asset {
+public @interface Prior {
 }

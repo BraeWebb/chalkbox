@@ -54,18 +54,25 @@ public class Execution {
         return runProcess(new File("."), timeout, args);
     }
 
+    /**
+     * Consume an input stream into a string.
+     *
+     * @param stream The input stream to consume.
+     * @return The resulting string of the entire input stream.
+     */
     public static String readStream(InputStream stream) {
         BufferedReader in = new BufferedReader(new InputStreamReader(stream));
         String line;
 
-        String result = "";
+        StringBuilder result = new StringBuilder();
         try {
             while ((line = in.readLine()) != null) {
-                result += line + System.lineSeparator();
+                result.append(line).append(System.lineSeparator());
             }
         } catch (IOException e) {
+            return null;
         }
 
-        return result;
+        return result.toString();
     }
 }
