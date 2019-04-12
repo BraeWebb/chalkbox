@@ -1,4 +1,4 @@
-package chalkbox.api.common;
+package chalkbox.api.common.java;
 
 import chalkbox.api.collections.Bundle;
 
