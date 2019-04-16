@@ -7,6 +7,8 @@ import org.json.simple.parser.ParseException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A mapping of keys to values in a JSON format
@@ -69,6 +71,24 @@ public class Data {
     }
 
     /**
+     * @return The keys of a data object.
+     */
+    public Set<String> keys() {
+        return json.keySet();
+    }
+
+    /**
+     * @return The keys of a data object at a given key.
+     */
+    public Set<String> keys(String key) {
+        Object json = get(key);
+        if (json instanceof JSONObject) {
+            return ((JSONObject) json).keySet();
+        }
+        return new HashSet<>();
+    }
+
+    /**
      * Return a boolean value at key, if key doesn't hold a boolean returns false.
      *
      * @param key The key to search for
@@ -93,13 +113,14 @@ public class Data {
             return json.get(key);
         }
 
-        String[] keys = key.split("\\.");
+        String[] keys = key.split("(?<!\\\\)\\.");
         JSONObject json = this.json;
         for (int i = 0; i < keys.length - 1; i++) {
-            if (!json.containsKey(keys[i])) {
+            String keyValue = keys[i].replace("\\.", ".");
+            if (!json.containsKey(keyValue)) {
                 return null;
             } else {
-                json = (JSONObject) json.get(keys[i]);
+                json = (JSONObject) json.get(keyValue);
             }
         }
         return json.get(keys[keys.length - 1]);
@@ -117,16 +138,17 @@ public class Data {
             return;
         }
 
-        String[] keys = key.split("\\.");
+        String[] keys = key.split("(?<!\\\\)\\.");
         JSONObject oldJson = this.json;
         JSONObject json = this.json;
         for (int i = 0; i < keys.length - 1; i++) {
-            if (!oldJson.containsKey(keys[i])) {
+            String keyValue = keys[i].replace("\\.", ".");
+            if (!oldJson.containsKey(keyValue)) {
                 json = new JSONObject();
             } else {
-                json = (JSONObject) oldJson.get(keys[i]);
+                json = (JSONObject) oldJson.get(keyValue);
             }
-            oldJson.put(keys[i], json);
+            oldJson.put(keyValue, json);
             oldJson = json;
         }
         json.put(keys[keys.length - 1], value);
