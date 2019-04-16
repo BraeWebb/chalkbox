@@ -1,6 +1,6 @@
 package chalkbox.csse2002;
 
-import chalkbox.api.annotations.Asset;
+import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
@@ -50,7 +50,7 @@ public class StyleValidator {
     private String[] categories;
 
     /** Split the style categories based on the pipe symbol */
-    @Asset
+    @Prior
     public void separateCategories(Map<String, String> config) {
         categories = styleCategories.split("\\|");
     }

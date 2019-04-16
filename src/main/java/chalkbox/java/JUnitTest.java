@@ -1,17 +1,15 @@
 package chalkbox.java;
 
-import chalkbox.api.annotations.Asset;
+import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
-import chalkbox.api.annotations.Stream;
 import chalkbox.api.collections.Bundle;
 import chalkbox.api.collections.Collection;
-import chalkbox.api.common.Compiler;
+import chalkbox.api.common.java.Compiler;
 import chalkbox.api.common.Execution;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -20,14 +18,11 @@ import java.util.concurrent.TimeoutException;
 public class JUnitTest {
     private static final String JUNIT_RUNNER = "org.junit.runner.JUnitCore";
 
-    @Stream
-    public PrintStream outStream;
-
     private Bundle tests;
     private boolean hasErrors;
     private String classPath;
 
-    @Asset
+    @Prior
     public void compileTests(Map<String, String> config) {
         tests = new Bundle(new File(config.get("tests")));
         Bundle solution = new Bundle(new File(config.get("solution")));

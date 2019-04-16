@@ -1,11 +1,10 @@
 package chalkbox.api;
 
-import chalkbox.api.annotations.Asset;
+import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Collector;
 import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.DataSet;
 import chalkbox.api.annotations.Output;
-import chalkbox.api.annotations.Parser;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
 
@@ -17,7 +16,6 @@ import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -178,6 +176,38 @@ public class ChalkBox {
         reader.close();
     }
 
+    private void runPriors(Class<?> clazz, Object instance) {
+        for (Method prior : methodsByAnnotation(clazz, Prior.class)) {
+            try {
+                prior.invoke(instance, config);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                hasError = true;
+            } catch (InvocationTargetException e) {
+                e.getTargetException().printStackTrace();
+                hasError = true;
+            }
+        }
+    }
+
+    private void assignConfigItems(Class<?> clazz, Object instance) {
+        for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
+            ConfigItem annotation = field.getAnnotation(ConfigItem.class);
+
+            String key = annotation.key();
+            if (key.isEmpty()) {
+                key = field.getName();
+            }
+
+            try {
+                field.set(instance, config.get(key));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                hasError = true;
+            }
+        }
+    }
+
     // TODO add helpful error messages for each thing that can go wrong
     private Object initClass(Class<?> clazz) {
         Object instance = null;
@@ -193,20 +223,13 @@ public class ChalkBox {
             e.printStackTrace();
         }
 
-        for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
-            ConfigItem annotation = field.getAnnotation(ConfigItem.class);
-
-            String key = annotation.key();
-            if (key.isEmpty()) {
-                key = field.getName();
-            }
-
-            try {
-                field.set(instance, config.get(key));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+        if (instance == null) {
+            hasError = true;
+            return null;
         }
+
+        assignConfigItems(clazz, instance);
+        runPriors(clazz, instance);
 
         return instance;
     }
@@ -218,28 +241,11 @@ public class ChalkBox {
             return;
         }
 
-        List<Method> parsers = methodsByAnnotation(collectorClass, Parser.class);
         List<Method> collectors = methodsByAnnotation(collectorClass, DataSet.class);
 
         Object instance = initClass(collectorClass);
-        if (instance == null) {
-            hasError = true;
+        if (hasError) {
             return;
-        }
-
-        for (Method parser : parsers) {
-            try {
-                Object result = parser.invoke(instance, config);
-                System.out.println(result);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                hasError = true;
-                return;
-            } catch (InvocationTargetException e) {
-                e.getTargetException().printStackTrace();
-                hasError = true;
-                return;
-            }
         }
 
         for (Method collector : collectors) {
@@ -261,34 +267,21 @@ public class ChalkBox {
 
     public void executeProcess(Class processorClass) {
         if (!processorClass.isAnnotationPresent(Processor.class)) {
+            hasError = true;
             System.err.println("Processor class does not have @Processor annotation");
             return;
         }
         Processor annotation = (Processor) processorClass.getAnnotation(Processor.class);
 
         for (Class dependency : annotation.depends()) {
-            if (processorClass.equals(dependency)) {
-                System.err.println("Circular process dependency detected in " + processorClass);
-                return;
-            }
             executeProcess(dependency);
         }
 
-        List<Method> assets = methodsByAnnotation(processorClass, Asset.class);
         List<Method> pipes = methodsByAnnotation(processorClass, Pipe.class);
 
         Object instance = initClass(processorClass);
-        if (instance == null) {
-            hasError = true;
+        if (hasError) {
             return;
-        }
-
-        for (Method asset : assets) {
-            try {
-                asset.invoke(instance, config);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
         for (Method pipe : pipes) {
@@ -303,8 +296,7 @@ public class ChalkBox {
         List<Method> outputs = methodsByAnnotation(outputClass, Output.class);
 
         Object instance = initClass(outputClass);
-        if (instance == null) {
-            hasError = true;
+        if (hasError) {
             return;
         }
 
