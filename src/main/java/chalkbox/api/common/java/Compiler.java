@@ -1,6 +1,7 @@
 package chalkbox.api.common.java;
 
 import chalkbox.api.collections.Bundle;
+import chalkbox.api.files.SourceFile;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -81,7 +82,7 @@ public class Compiler {
      * @param source The bundle to search through.
      * @return A generic iterable of JavaFileObjects.
      */
-    public static Iterable<? extends JavaFileObject> getSourceFiles(Bundle source) {
+    public static List<SourceFile> getSourceFiles(Bundle source) {
         try {
             return Arrays.asList(source.getFiles(".java"));
         } catch (IOException e) {

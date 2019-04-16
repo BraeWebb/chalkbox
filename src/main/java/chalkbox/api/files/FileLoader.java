@@ -94,6 +94,17 @@ public class FileLoader {
     /**
      * Utility function to truncate a path relative to root
      */
+    public static String truncatePath(File root, File path) {
+        String location = root.toURI().relativize(path.toURI()).getPath();
+        if (path.isDirectory()) {
+            location = location.substring(0, location.length() - 1);
+        }
+        return location;
+    }
+
+    /**
+     * Utility function to truncate a path relative to root
+     */
     private String truncatePath(File path) {
         String relative = root.toURI().relativize(path.toURI()).getPath();
         if (removeSuffix) {
