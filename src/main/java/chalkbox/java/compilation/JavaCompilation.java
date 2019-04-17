@@ -1,4 +1,4 @@
-package chalkbox.java;
+package chalkbox.java.compilation;
 
 import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.Pipe;
