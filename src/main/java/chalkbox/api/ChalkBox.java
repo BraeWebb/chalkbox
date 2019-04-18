@@ -140,7 +140,7 @@ public class ChalkBox {
     private static List<Method> methodsByAnnotation(Class clazz,
                                                     Class<? extends Annotation> annotation) {
         List<Method> methods = new ArrayList<>();
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation)) {
                 methods.add(method);
             }
