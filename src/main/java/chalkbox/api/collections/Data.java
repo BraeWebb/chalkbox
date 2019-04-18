@@ -123,7 +123,7 @@ public class Data {
                 json = (JSONObject) json.get(keyValue);
             }
         }
-        return json.get(keys[keys.length - 1]);
+        return json.get(keys[keys.length - 1].replace("\\.", "."));
     }
 
     /**
@@ -151,7 +151,7 @@ public class Data {
             oldJson.put(keyValue, json);
             oldJson = json;
         }
-        json.put(keys[keys.length - 1], value);
+        json.put(keys[keys.length - 1].replace("\\.", "."), value);
     }
 
     @Override
