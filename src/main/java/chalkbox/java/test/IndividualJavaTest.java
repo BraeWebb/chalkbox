@@ -1,5 +1,6 @@
 package chalkbox.java.test;
 
+import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Processor;
@@ -8,7 +9,6 @@ import chalkbox.api.collections.Data;
 import chalkbox.api.common.java.JUnitRunner;
 import chalkbox.api.files.FileLoader;
 import chalkbox.java.compilation.IndividualJavaCompiler;
-import chalkbox.java.test.JavaTest;
 
 import java.io.File;
 import java.util.HashMap;
@@ -21,11 +21,14 @@ import java.util.Map;
  */
 @Processor(depends = {IndividualJavaCompiler.class})
 public class IndividualJavaTest extends JavaTest {
+    @ConfigItem(key = "temp", description = "A temporary output directory")
+    public String tempResults;
+
     private Map<String, String> classPaths = new HashMap<>();
 
     @Prior
     public void buildClassPath(Map<String, String> config) {
-        File solutionFolder = new File(config.get("results") + File.separator + "solution");
+        File solutionFolder = new File(tempResults + File.separator + "solution");
 
         File[] classes = solutionFolder.listFiles();
         for (File clazz : classes) {

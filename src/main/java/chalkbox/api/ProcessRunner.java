@@ -29,7 +29,6 @@ public class ProcessRunner extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Starting new thread " + getName());
         for (Object item : dataSegment) {
             try {
                 updatedSegment.add(method.invoke(instance, item));
@@ -37,7 +36,6 @@ public class ProcessRunner extends Thread {
                 e.printStackTrace();
             }
         }
-        System.out.println("Closing thread " + getName());
     }
 
     public static List<Object> executeProcess(List<Object> data, Object instance, Method method) {

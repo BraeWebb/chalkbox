@@ -76,6 +76,13 @@ public class ChalkBox {
      * @param clazz The class to search for {@link ConfigItem}'s within.
      */
     private void validateConfigItems(Class clazz) {
+        /* Also check the processor dependency processors */
+        if (clazz.isAnnotationPresent(Processor.class)) {
+            Processor annotation = (Processor) clazz.getAnnotation(Processor.class);
+            for (Class dependency : annotation.depends()) {
+                validateConfigItems(dependency);
+            }
+        }
         for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
             ConfigItem annotation = field.getAnnotation(ConfigItem.class);
 

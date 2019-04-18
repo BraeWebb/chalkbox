@@ -61,7 +61,7 @@ public class IndividualJavaCompiler {
             description = "Path to a sample solution to compile submitted files with")
     public String solutionPath;
 
-    @ConfigItem(key = "results", description = "A temporary output directory")
+    @ConfigItem(key = "temp", description = "A temporary output directory")
     public String outputFolder;
 
     /** A map of class names to the class path to compile that class with */
