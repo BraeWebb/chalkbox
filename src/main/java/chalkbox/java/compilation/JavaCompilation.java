@@ -38,7 +38,7 @@ import java.io.StringWriter;
 @Processor
 public class JavaCompilation {
     @ConfigItem(description = "Class path to use to compile submissions")
-    private String classPath;
+    public String classPath;
 
 
     @Pipe(stream = "submissions")

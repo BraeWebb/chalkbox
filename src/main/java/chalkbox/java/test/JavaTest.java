@@ -47,7 +47,7 @@ import java.util.Map;
 @Processor(depends = {JavaCompilation.class})
 public class JavaTest {
     private Bundle tests;
-    private boolean hasErrors;
+    protected boolean hasErrors;
 
     @ConfigItem(key = "solution", description = "Sample solution to compile tests with")
     public String solutionPath;
