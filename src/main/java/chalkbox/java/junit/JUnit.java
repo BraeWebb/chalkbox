@@ -97,7 +97,7 @@ public class JUnit {
             String classPath = classPaths.get(solution) + ":" + submission.getWorking().getUnmaskedPath();
             for (String testClass : testClasses) {
                 Data results = JUnitRunner.runTest(testClass, classPath);
-                String jsonRoot = "junit." + solution + "." + testClass.replace(".", "\\.");
+                String jsonRoot = "junit.solutions." + solution + "." + testClass.replace(".", "\\.");
                 submission.getResults().set(jsonRoot, results);
             }
         }

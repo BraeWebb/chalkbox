@@ -9,6 +9,7 @@ import chalkbox.api.collections.Data;
 import chalkbox.api.common.java.JUnitRunner;
 import chalkbox.api.files.FileLoader;
 import chalkbox.java.compilation.IndividualJavaCompiler;
+import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.util.HashMap;
@@ -42,18 +43,26 @@ public class IndividualJavaTest extends JavaTest {
             return submission;
         }
 
+        // TODO: remove this
+        // to remove the results of only the last fuckup
+        submission.getResults().set("tests", new JSONObject());
+
         for (String clazz : classPaths.keySet()) {
+            String className = clazz + "Test";
+            String rootJSON = "tests." + className
+                    .replace(".", "\\.");
+
             if (!submission.getResults().is("compilation."
                     + clazz.replace(".", "\\.") + ".compiles")) {
-                return submission;
+                submission.getResults().set(rootJSON + ".errors",
+                        "Class could not compile - tests not run");
+                continue;
             }
 
             String classPath = this.classPath + ":" + classPaths.get(clazz)
                     + ":" + submission.getWorking().getUnmaskedPath(clazz);
-            String className = clazz + "Test";
             Data results = JUnitRunner.runTest(className, classPath);
-            submission.getResults().set("tests." + className
-                    .replace(".", "\\."), results);
+            submission.getResults().set(rootJSON, results);
         }
 
         return submission;

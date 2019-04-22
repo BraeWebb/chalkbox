@@ -31,7 +31,7 @@ public class Grader {
     /* TODO: This is currently a constant in case test totals are calculated
      * correctly by an individual submission */
     /** Total amount of possible passing tests */
-    private static float TOTAL_TESTS = 100f;
+    private static float TOTAL_TESTS = 162f;
 
     /**
      * Grade a submission.
@@ -67,8 +67,8 @@ public class Grader {
 
         /* Determine the baseline amount of tests that pass for the sample solution */
         Map<String, Integer> baseline = new HashMap<>();
-        for (String clazz : data.keys("junit.solution1")) {
-            int passes = Integer.parseInt(data.get("junit.solution1."
+        for (String clazz : data.keys("junit.solutions.solution")) {
+            int passes = Integer.parseInt(data.get("junit.solutions.solution."
                     + clazz.replace(".", "\\.") + ".passes").toString());
             baseline.put(clazz, passes);
         }
@@ -76,15 +76,21 @@ public class Grader {
         /* Calculate the amount of solutions with less tests passing than the sample */
         float totalPossible = 0f;
         float junitGrade = 0f;
-        for (String solution : data.keys("junit")) {
+        for (String solution : data.keys("junit.solutions")) {
             if (solution.equals("output") || solution.equals("compiles")
-                    || solution.equals("solution1")) {
+                    || solution.equals("solution")) {
                 continue;
             }
 
-            for (String clazz : data.keys("junit." + solution)) {
-                int passes = Integer.parseInt(data.get("junit." + solution + "."
-                        + clazz.replace(".", "\\.") + ".passes").toString());
+            for (String clazz : data.keys("junit.solutions." + solution)) {
+                String testKey = "junit.solutions." + solution + "."
+                        + clazz.replace(".", "\\.");
+
+                if (data.get(testKey + ".passes") == null) {
+                    continue;
+                }
+
+                int passes = Integer.parseInt(data.get(testKey + ".passes").toString());
 
                 if (passes < baseline.get(clazz)) {
                     junitGrade += 1;
@@ -94,15 +100,22 @@ public class Grader {
             totalPossible += 1;
         }
 
+        /*
+         * Cap the grade - for the case where a broken solution increments the
+         * amount of failing tests in multiple of their classes
+         * (I am currently counting this so we don't have to distinguish
+         * between which broken test should break which test)
+         */
+        junitGrade = junitGrade > totalPossible ? totalPossible : junitGrade;
         float junitPercent = totalPossible != 0 ? (junitGrade / totalPossible) * 20 : 0;
         total += junitPercent;
         data.set("grades.junit.possible", totalPossible);
         data.set("grades.junit.total", junitGrade);
-        data.set("grades.junit.percent", junitPercent);
+        data.set("grades.junit.grade", junitPercent);
 
         data.set("grades.total", total);
 
-        System.out.println(data);
+        System.out.println(data.get("grades"));
 
         return submission;
     }

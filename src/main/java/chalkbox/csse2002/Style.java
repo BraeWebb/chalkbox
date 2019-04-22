@@ -63,7 +63,7 @@ public class Style {
     /** Root directory of style files. Directory should include .style files in top level */
     @ConfigItem(key = "style",
                 description = "Root directory of style files. Top level should have only .style files")
-    private String styleRoot;
+    public String styleRoot;
 
     /**
      * Read a style file into the JSON format described in the {@link Style}
