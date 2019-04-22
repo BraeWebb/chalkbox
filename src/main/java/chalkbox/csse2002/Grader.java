@@ -5,6 +5,7 @@ import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
 import chalkbox.api.collections.Data;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +41,8 @@ public class Grader {
     public Collection grade(Collection submission) {
         Data data = submission.getResults();
 
+        /* For rounding grades */
+        DecimalFormat rounder = new DecimalFormat("###.##");
         float total = 0;
 
         /* Calculate the style marks total */
@@ -60,16 +63,22 @@ public class Grader {
                         + test.replace(".", "\\.") + ".passes").toString());
             }
         }
+        float testGrade = (passingTests / TOTAL_TESTS) * 55;
         data.set("grades.tests.passing", passingTests);
         data.set("grades.tests.percent", passingTests / TOTAL_TESTS);
-        data.set("grades.tests.grade", (passingTests / TOTAL_TESTS) * 55);
+        data.set("grades.tests.rawGrade", testGrade);
+        data.set("grades.tests.grade", rounder.format(testGrade));
         total += (passingTests / TOTAL_TESTS) * 55;
 
         /* Determine the baseline amount of tests that pass for the sample solution */
         Map<String, Integer> baseline = new HashMap<>();
         for (String clazz : data.keys("junit.solutions.solution")) {
-            int passes = Integer.parseInt(data.get("junit.solutions.solution."
-                    + clazz.replace(".", "\\.") + ".passes").toString());
+            Object base = data.get("junit.solutions.solution."
+                    + clazz.replace(".", "\\.") + ".passes");
+            if (base == null) {
+                continue;
+            }
+            int passes = Integer.parseInt(base.toString());
             baseline.put(clazz, passes);
         }
 
@@ -94,24 +103,19 @@ public class Grader {
 
                 if (passes < baseline.get(clazz)) {
                     junitGrade += 1;
+                    break;
                 }
             }
 
             totalPossible += 1;
         }
 
-        /*
-         * Cap the grade - for the case where a broken solution increments the
-         * amount of failing tests in multiple of their classes
-         * (I am currently counting this so we don't have to distinguish
-         * between which broken test should break which test)
-         */
-        junitGrade = junitGrade > totalPossible ? totalPossible : junitGrade;
         float junitPercent = totalPossible != 0 ? (junitGrade / totalPossible) * 20 : 0;
         total += junitPercent;
         data.set("grades.junit.possible", totalPossible);
         data.set("grades.junit.total", junitGrade);
-        data.set("grades.junit.grade", junitPercent);
+        data.set("grades.junit.rawGrade", junitPercent);
+        data.set("grades.junit.grade", rounder.format(junitPercent));
 
         data.set("grades.total", total);
 
