@@ -1,0 +1,15 @@
+collector=chalkbox.collectors.FolderCollector
+processor=chalkbox.java.test.IndividualJavaTest
+output=chalkbox.output.SaveJsonOutput
+
+root=/Users/brae/projects/csse2002/marker/environments/ass1/submissions
+classPath=./sample/junit/hamcrest-core-1.3.jar:./sample/junit/junit-4.12.jar
+
+# Sample solution to compile the functionality tests with
+solution=/Users/brae/projects/csse2002/marker/environments/ass1/expected
+
+# Functionality tests for the assignment
+tests=/Users/brae/projects/csse2002/marker/environments/ass1/tests
+
+# Temporary directory for shared compiled classes
+temp=./sample/output
