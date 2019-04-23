@@ -120,7 +120,7 @@ public class Grader {
         }
         /* Cap:  If S > F, then S = F */
         if (styleMarks > testMarks) {
-            styleMarks = testMarks;
+            styleMarks = Math.round(testMarks);
         }
         /* Cap: If J > F, then J = F */
         if (junitMarks > testMarks) {
