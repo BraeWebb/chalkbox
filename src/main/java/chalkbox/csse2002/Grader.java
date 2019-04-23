@@ -5,6 +5,7 @@ import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
 import chalkbox.api.collections.Data;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,16 +43,8 @@ public class Grader {
         Data data = submission.getResults();
 
         /* For rounding grades */
-        DecimalFormat rounder = new DecimalFormat("###.##");
-        float total = 0;
-
-        /* Calculate the style marks total */
-        float styleMarks = 0;
-        for (String category : data.keys("style.marks")) {
-            styleMarks += Float.parseFloat(data.get("style.marks." + category).toString());
-        }
-        total += styleMarks;
-        data.set("grades.style", styleMarks);
+        DecimalFormat rounder = new DecimalFormat("###");
+        rounder.setRoundingMode(RoundingMode.FLOOR);
 
         /* Calculate the percentage of passing java tests */
         int passingTests = 0;
@@ -63,12 +56,16 @@ public class Grader {
                         + test.replace(".", "\\.") + ".passes").toString());
             }
         }
-        float testGrade = (passingTests / TOTAL_TESTS) * 55;
+        float testMarks = (passingTests / TOTAL_TESTS) * 55;
         data.set("grades.tests.passing", passingTests);
         data.set("grades.tests.percent", passingTests / TOTAL_TESTS);
-        data.set("grades.tests.rawGrade", testGrade);
-        data.set("grades.tests.grade", rounder.format(testGrade));
-        total += (passingTests / TOTAL_TESTS) * 55;
+        data.set("grades.tests.rawGrade", testMarks);
+
+        /* Calculate the style marks total */
+        float styleMarks = 0;
+        for (String category : data.keys("style.marks")) {
+            styleMarks += Float.parseFloat(data.get("style.marks." + category).toString());
+        }
 
         /* Determine the baseline amount of tests that pass for the sample solution */
         Map<String, Integer> baseline = new HashMap<>();
@@ -110,16 +107,32 @@ public class Grader {
             totalPossible += 1;
         }
 
-        float junitPercent = totalPossible != 0 ? (junitGrade / totalPossible) * 20 : 0;
-        total += junitPercent;
+        float junitMarks = totalPossible != 0 ? (junitGrade / totalPossible) * 20 : 0;
+
         data.set("grades.junit.possible", totalPossible);
         data.set("grades.junit.total", junitGrade);
-        data.set("grades.junit.rawGrade", junitPercent);
-        data.set("grades.junit.grade", rounder.format(junitPercent));
+        data.set("grades.junit.rawGrade", junitMarks);
 
-        data.set("grades.total", total);
 
-        System.out.println(data.get("grades"));
+        /* Cap: If F < 5, then S = 0 */
+        if (testMarks < 5) {
+            styleMarks = 0;
+        }
+        /* Cap:  If S > F, then S = F */
+        if (styleMarks > testMarks) {
+            styleMarks = testMarks;
+        }
+        /* Cap: If J > F, then J = F */
+        if (junitMarks > testMarks) {
+            junitMarks = testMarks;
+        }
+
+        data.set("grades.tests.grade", Math.round(testMarks));
+        data.set("grades.style", styleMarks);
+        data.set("grades.junit.grade", Math.round(junitMarks));
+        data.set("grades.total", Math.round(testMarks) + styleMarks + Math.round(junitMarks));
+
+        System.out.println(data.get("sid") + ": " + data.get("grades"));
 
         return submission;
     }
