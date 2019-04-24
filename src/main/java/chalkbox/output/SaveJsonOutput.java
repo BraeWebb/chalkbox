@@ -15,6 +15,7 @@ public class SaveJsonOutput {
     public void output(PrintStream stream, List<Collection> collections) {
         for (Collection collection : collections) {
             Data results = collection.getResults();
+            results.set("timestamp", System.currentTimeMillis() / 1000L);
             File jsonFile = new File((String) results.get("json"));
             try {
                 Files.write(jsonFile.toPath(), results.toString().getBytes());
