@@ -1,5 +1,5 @@
 collector=chalkbox.collectors.FolderCollector
-processor=chalkbox.java.junit.JUnitHack
+processor=chalkbox.java.junit.JUnit
 output=chalkbox.output.SaveJsonOutput
 
 root=/Users/brae/drive/csse2002/2019s1/ass1/extensions
