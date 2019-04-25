@@ -1,6 +1,0 @@
-collector=chalkbox.collectors.FolderCollector
-processor=chalkbox.csse2002.IntegrityRemoval
-output=chalkbox.output.SaveJsonOutput
-
-root=/Users/brae/projects/csse2002/marker/environments/ass1/submissions
-cases=./sample/cases.txt

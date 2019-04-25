@@ -8,6 +8,7 @@ import chalkbox.api.collections.Bundle;
 import chalkbox.api.collections.Collection;
 import chalkbox.api.collections.Data;
 import chalkbox.api.common.java.Compiler;
+import chalkbox.api.files.FileLoader;
 import chalkbox.java.compilation.JavaCompilation;
 import chalkbox.java.conformance.comparator.ClassComparator;
 import chalkbox.java.conformance.comparator.CodeComparator;
@@ -15,17 +16,23 @@ import chalkbox.java.conformance.comparator.CodeComparator;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Processor(depends = {JavaCompilation.class})
 public class Conformance {
-    @ConfigItem
+    @ConfigItem(description = "The location of files to use for conformance checking")
     public String conformance;
+
+    @ConfigItem(description = "The expected file structure for the assignment")
+    public String structure;
 
     @ConfigItem
     public String classPath;
 
     private Map<String, Class> expectedClasses;
+    private List<String> expectedFiles;
 
     /**
      * Loads the expected class files into the conformance checker
@@ -56,6 +63,35 @@ public class Conformance {
         }
     }
 
+    @Prior
+    public void loadStructure(Map<String, String> config) {
+        expectedFiles = FileLoader.loadFiles(structure);
+    }
+
+    @Pipe(stream = "submissions")
+    public Collection files(Collection submission) {
+        List<String> missing = new ArrayList<>();
+        List<String> extra = new ArrayList<>();
+        List<String> actual = FileLoader.loadFiles(submission.getSource().getUnmaskedPath());
+
+        for (String expected : expectedFiles) {
+            if (!actual.contains(expected)) {
+                missing.add(expected);
+            }
+        }
+
+        for (String path : actual) {
+            if (!expectedFiles.contains(path)) {
+                extra.add(path);
+            }
+        }
+
+        submission.getResults().set("structure.missing", missing);
+        submission.getResults().set("structure.extra", extra);
+
+        return submission;
+    }
+
     @Pipe(stream = "submissions")
     public Collection compare(Collection submission) throws IOException {
         Data data = submission.getResults();
@@ -64,8 +100,8 @@ public class Conformance {
         Map<String, Class> submissionMap;
         try {
             submissionMap = submissionLoader.getClassMap();
-        } catch (ClassNotFoundException cnf) {
-            System.err.println("Failed to find class");
+        } catch (ClassNotFoundException|NoClassDefFoundError cnf) {
+            data.set("conformance.error", "Unable to find a class - consult a tutor");
             cnf.printStackTrace();
             return submission;
         }

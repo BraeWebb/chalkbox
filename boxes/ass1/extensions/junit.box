@@ -2,7 +2,8 @@ collector=chalkbox.collectors.FolderCollector
 processor=chalkbox.java.junit.JUnit
 output=chalkbox.output.SaveJsonOutput
 
-root=/Users/brae/projects/csse2002/marker/environments/ass1/submissions
+root=/Users/brae/drive/csse2002/2019s1/ass1/extensions
+json=/Users/brae/drive/csse2002/2019s1/marking/ass1extensions
 classPath=./sample/junit/hamcrest-core-1.3.jar:./sample/junit/junit-4.12.jar
 
 # Sample solution to compile the functionality tests with

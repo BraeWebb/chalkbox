@@ -3,3 +3,4 @@ processor=chalkbox.csse2002.Grader
 output=chalkbox.output.SaveJsonOutput
 
 root=/Users/brae/drive/csse2002/2019s1/ass1/extensions
+json=/Users/brae/drive/csse2002/2019s1/marking/ass1extensions

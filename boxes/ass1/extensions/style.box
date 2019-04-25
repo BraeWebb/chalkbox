@@ -3,6 +3,7 @@ processor=chalkbox.csse2002.Style
 output=chalkbox.output.SaveJsonOutput
 
 root=/Users/brae/drive/csse2002/2019s1/ass1/extensions
+json=/Users/brae/drive/csse2002/2019s1/marking/ass1extensions
 
 style=/Users/brae/drive/csse2002/2019s1/ass1/kt-extensions
 styleCategories=Naming|Structure and layout|Good OO|Commenting

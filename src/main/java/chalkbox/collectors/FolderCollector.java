@@ -10,6 +10,7 @@ import chalkbox.api.collections.Data;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ import java.util.Map;
 public class FolderCollector {
     @ConfigItem(key = "root", description = "Root directory of folder submissions")
     public String folderPath;
+
+    @ConfigItem(key = "json", description = "JSON output directory")
+    public String jsonOutput;
 
     private File folder;
     private boolean parseError = false;
@@ -29,6 +33,14 @@ public class FolderCollector {
         if (!this.folder.exists() || !this.folder.isDirectory()) {
             parseError = true;
             System.err.println("Folder parameter does not exist or is not a folder");
+        }
+
+        if (!Files.exists(Paths.get(jsonOutput))) {
+            try {
+                Files.createDirectory(Paths.get(jsonOutput));
+            } catch (IOException e) {
+                System.err.println("Unable to create output json directory");
+            }
         }
     }
 
@@ -44,7 +56,7 @@ public class FolderCollector {
                 continue;
             }
 
-            String jsonPath = submissionFolder.getPath() + File.separator
+            String jsonPath = jsonOutput + File.separator
                     + submissionFolder.getName() + ".json";
             File configFile = new File(jsonPath);
 

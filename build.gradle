@@ -1,8 +1,7 @@
 plugins {
     id 'java'
+    id 'application'
 }
-
-version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -17,3 +16,23 @@ dependencies {
     // Command line argument parsing
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
+
+mainClassName = 'chalkbox.api.ChalkBox'
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    baseName = project.name
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
