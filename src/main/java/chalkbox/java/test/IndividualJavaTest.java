@@ -43,10 +43,6 @@ public class IndividualJavaTest extends JavaTest {
             return submission;
         }
 
-        // TODO: remove this
-        // to remove the results of only the last fuckup
-        submission.getResults().set("tests", new JSONObject());
-
         for (String clazz : classPaths.keySet()) {
             String className = clazz + "Test";
             String rootJSON = "tests." + className

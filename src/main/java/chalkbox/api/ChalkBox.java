@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -33,6 +34,22 @@ public class ChalkBox {
     private Class output;
     private Map<String, String> config = new HashMap<>();
     private boolean hasError;
+
+    private PrintStream outputStream = System.out;
+
+    public ChalkBox() {
+
+    }
+
+    public void loadConfig(Map<String, String> config) {
+        this.config.putAll(config);
+    }
+
+    public void setOutput(PrintStream stream) {
+        outputStream = stream;
+    }
+
+
 
     /**
      * Construct a new ChalkBox instance based on the configuration file.
@@ -257,7 +274,13 @@ public class ChalkBox {
 
         for (Method collector : collectors) {
             try {
+                PrintStream oldOut = System.out;
+                System.setOut(outputStream);
+                PrintStream oldErr = System.err;
+                System.setErr(outputStream);
                 Object result = collector.invoke(instance, config);
+                System.setOut(oldOut);
+                System.setErr(oldErr);
                 if (!(result instanceof List)) {
                     System.err.println("wtf dude");
                     return;

@@ -74,6 +74,8 @@ public class FolderCollector {
                 }
             }
 
+            System.out.println("Loading " + submissionFolder.getName());
+
             metadata.set("sid", submissionFolder.getName());
             metadata.set("root", submissionFolder.getPath());
             metadata.set("json", configFile.getPath());
