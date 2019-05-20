@@ -27,7 +27,7 @@ public class SourceLoader extends ClassLoader {
         this.classDirectory = file;
         this.files = new ArrayList<>();
         for (String fileName : loader.loadFiles(file)) {
-            this.files.add(fileName.replaceAll("/", "."));
+            this.files.add(fileName.replace("/", "."));
         }
     }
 
@@ -45,7 +45,7 @@ public class SourceLoader extends ClassLoader {
 
     private File getFile(String className) {
         return new File(classDirectory.getPath() + File.separator
-                + className.replaceAll("\\.", File.separator) + ".class");
+                + className.replace(".", File.separator) + ".class");
     }
 
     @Override
