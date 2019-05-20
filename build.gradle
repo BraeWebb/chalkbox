@@ -15,6 +15,8 @@ dependencies {
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
     // Command line argument parsing
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    // Reflect for loading class in the GUI
+    compile "org.reflections:reflections:0.9.11"
 }
 
 mainClassName = 'chalkbox.api.ChalkBox'

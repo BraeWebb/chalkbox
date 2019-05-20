@@ -1,15 +1,14 @@
 package chalkbox.api;
 
-import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Collector;
 import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.DataSet;
 import chalkbox.api.annotations.Output;
 import chalkbox.api.annotations.Pipe;
+import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Processor;
 
 import java.io.BufferedReader;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -33,6 +32,34 @@ public class ChalkBox {
     private Class output;
     private Map<String, String> config = new HashMap<>();
     private boolean hasError;
+
+    private PrintStream outputStream = System.out;
+
+    /**
+     * Constructor a new ChalkBox instance without loading any configuration.
+     */
+    public ChalkBox() {
+
+    }
+
+    /**
+     * Add the given configuration to the ChalkBox configuration.
+     *
+     * @param config A configuration of chalkbox.
+     */
+    public void loadConfig(Map<String, String> config) {
+        this.config.putAll(config);
+    }
+
+    /**
+     * Set the output stream of running the chalkbox to the given print stream.
+     *
+     * @param stream Stream to output run output to.
+     */
+    public void setOutput(PrintStream stream) {
+        outputStream = stream;
+    }
+
 
     /**
      * Construct a new ChalkBox instance based on the configuration file.
@@ -257,7 +284,13 @@ public class ChalkBox {
 
         for (Method collector : collectors) {
             try {
+                PrintStream oldOut = System.out;
+                System.setOut(outputStream);
+                PrintStream oldErr = System.err;
+                System.setErr(outputStream);
                 Object result = collector.invoke(instance, config);
+                System.setOut(oldOut);
+                System.setErr(oldErr);
                 if (!(result instanceof List)) {
                     System.err.println("wtf dude");
                     return;
@@ -310,7 +343,7 @@ public class ChalkBox {
         for (Method output : outputs) {
             String stream = output.getAnnotation(Output.class).stream();
             try {
-                output.invoke(instance, System.out, streams.get(stream));
+                output.invoke(instance, outputStream, streams.get(stream));
             } catch (Exception e) {
                 e.printStackTrace();
             }

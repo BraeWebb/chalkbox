@@ -100,7 +100,7 @@ public class JUnit {
             String classPath = classPaths.get(solution) + ":" + submission.getWorking().getUnmaskedPath();
             for (String testClass : testClasses) {
                 Data results = JUnitRunner.runTest(testClass, classPath);
-                String jsonRoot = "junit.solutions." + solution + "." + testClass.replace(".", "\\.");
+                String jsonRoot = SOLUTIONS_ROOT + "." + solution + "." + testClass.replace(".", "\\.");
                 submission.getResults().set(jsonRoot, results);
             }
         }
@@ -109,8 +109,8 @@ public class JUnit {
     }
 
     /**
-     * Set a flag on each of the broken solutions to indicate whether it
-     * is correctly identified or not.
+     * Gives a .correct flag to each broken solution.
+     * .correct is true iff the solution passes fewer tests than the sample solution.
      *
      * TODO: Fix this so the flag is set when the test is run
      */
