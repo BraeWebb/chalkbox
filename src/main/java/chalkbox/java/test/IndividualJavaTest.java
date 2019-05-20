@@ -4,6 +4,7 @@ import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Processor;
+import chalkbox.api.collections.Bundle;
 import chalkbox.api.collections.Collection;
 import chalkbox.api.collections.Data;
 import chalkbox.api.common.java.JUnitRunner;
@@ -43,8 +44,10 @@ public class IndividualJavaTest extends JavaTest {
             return submission;
         }
 
-        for (String clazz : classPaths.keySet()) {
-            String className = clazz + "Test";
+        Bundle tests = new Bundle(new File(testPath));
+
+        for (String className : tests.getClasses("")) {
+            String clazz = className.replace("Test", "");
             String rootJSON = "tests." + className
                     .replace(".", "\\.");
 
