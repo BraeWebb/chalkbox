@@ -1,0 +1,9 @@
+collector=chalkbox.collectors.FolderCollector
+processor=chalkbox.csse2002.StyleValidator
+output=chalkbox.output.DebugOutput
+
+root=/Users/brae/drive/csse2002/2019s1//ass2/submissions
+json=/Users/brae/drive/csse2002/2019s1/marking/ass2
+
+style=/Users/brae/drive/csse2002/2019s1/ass2/style
+styleCategories=Naming|Structure and Layout|Good OO|Commenting

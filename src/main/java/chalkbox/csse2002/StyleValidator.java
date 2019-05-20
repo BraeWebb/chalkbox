@@ -52,7 +52,7 @@ public class StyleValidator {
     /** Split the style categories based on the pipe symbol */
     @Prior
     public void separateCategories(Map<String, String> config) {
-        categories = styleCategories.split("\\|");
+        categories = styleCategories.toLowerCase().split("\\|");
     }
 
     /**
@@ -82,7 +82,7 @@ public class StyleValidator {
         Set<String> foundCategories = new HashSet<>();
         Matcher matcher = Style.STYLE_PATTERN.matcher(style);
         while (matcher.find()) {
-            foundCategories.add(matcher.group(1).trim());
+            foundCategories.add(matcher.group(1).trim().toLowerCase());
         }
 
         Set<String> expectedCategories = new HashSet<>(Arrays.asList(categories));
@@ -90,8 +90,8 @@ public class StyleValidator {
          * categories expected */
         boolean goodFormat = foundCategories.equals(expectedCategories);
         if (!goodFormat) {
-            System.err.println(sid + " is missing grades for categories:");
-            System.err.println(style);
+            System.err.print(sid + " is missing categories. Found: "
+                    + foundCategories + System.lineSeparator() + style);
         }
 
         return collection;

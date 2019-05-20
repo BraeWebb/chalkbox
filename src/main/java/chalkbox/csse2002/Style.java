@@ -58,7 +58,9 @@ public class Style {
      * <p>Searches for the pattern:
      * <pre>\n ANY_TOKENS COMMA WHITESPACE|NOTHING float|int FORWARD_SLASH int \n</pre>
      */
-    static final Pattern STYLE_PATTERN = Pattern.compile("(?:\\n|^)*([^\\n:]+):\\s*([0-9]*[.]*[0-9])\\s*\\/\\s*([0-9]*)\\n");
+    static final Pattern STYLE_PATTERN =
+            Pattern.compile("(?:\\n|^)*([^\\n:]+):\\s*([0-9]*[.]*[0-9])\\s*\\/\\s*([0-9]*)\\n",
+                    Pattern.CASE_INSENSITIVE);
 
     /** Root directory of style files. Directory should include .style files in top level */
     @ConfigItem(key = "style",
