@@ -1,0 +1,10 @@
+collector=chalkbox.collectors.FolderCollector
+processor=chalkbox.java.conformance.Conformance
+output=chalkbox.output.SaveJsonOutput
+
+root=/Users/brae/drive/csse2002/2019s1/ass2/precheck2
+json=/Users/brae/drive/csse2002/2019s1/marking/ass2pre2
+classPath=./sample/junit/hamcrest-core-1.3.jar:./sample/junit/junit-4.12.jar
+
+conformance=/Users/brae/drive/csse2002/2019s1/ass2/conformance/src
+structure=/Users/brae/drive/csse2002/2019s1/ass2/conformance
