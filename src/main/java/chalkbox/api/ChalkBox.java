@@ -307,23 +307,14 @@ public class ChalkBox {
             return;
         }
 
-        PrintStream outFile;
-        try {
-            outFile = new PrintStream(new FileOutputStream("./sample/hardcoded"));
-        } catch (IOException e) {
-            System.err.println("Unable to open output stream");
-            return;
-        }
-
         for (Method output : outputs) {
             String stream = output.getAnnotation(Output.class).stream();
             try {
-                output.invoke(instance, outFile, streams.get(stream));
+                output.invoke(instance, System.out, streams.get(stream));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        outFile.close();
     }
 
     public static String classHelp(String className) {

@@ -138,6 +138,10 @@ public class Data {
             return;
         }
 
+        if (value instanceof Data) {
+            value = ((Data) value).json;
+        }
+
         String[] keys = key.split("(?<!\\\\)\\.");
         JSONObject oldJson = this.json;
         JSONObject json = this.json;
