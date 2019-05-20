@@ -8,11 +8,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Bundle of files and folders, abstracting away folders.
@@ -231,6 +233,30 @@ public class Bundle {
     public boolean deleteFile(String uri) {
         File file = new File(getUnmaskedPath(uri));
         return file.delete();
+    }
+
+    /**
+     * Copy a folder into the current bundle.
+     *
+     * @param src The source folder to copy into this bundle.
+     * @throws IOException
+     */
+    public void copyFolder(File src) throws IOException {
+        File dest = folder;
+
+        try (Stream<Path> stream = Files.walk(src.toPath())) {
+            stream.forEachOrdered(sourcePath -> {
+                try {
+                    Files.copy(
+                            /*Source Path*/
+                            sourcePath,
+                            /*Destination Path */
+                            src.toPath().resolve(dest.toPath().relativize(sourcePath)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     /**

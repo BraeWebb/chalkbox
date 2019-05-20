@@ -3,6 +3,7 @@ package chalkbox.api.common.java;
 import chalkbox.api.collections.Data;
 import chalkbox.api.common.Execution;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
@@ -16,17 +17,18 @@ public class JUnitRunner {
      * Run a JUnit test with the name className and a given classPath.
      *
      * @param className Name of the JUnit class to execute.
-     * @param classPath Class path for the JUnit execution
+     * @param classPath Class path for the JUnit execution.
+     * @param working Working directory to execute tests within.
      *
      * @return The json output of executing a JUnit test
      */
-    public static Data runTest(String className, String classPath) {
+    public static Data runTest(String className, String classPath, File working) {
         Data results = new Data();
 
         /* Execute a JUnit process */
         Process process;
         try {
-            process = Execution.runProcess(10000, "java", "-cp",
+            process = Execution.runProcess(working, 10000, "java", "-cp",
                     classPath, JUNIT_RUNNER, className);
         } catch (IOException e) {
             e.printStackTrace();

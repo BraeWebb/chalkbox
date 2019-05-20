@@ -107,7 +107,7 @@ public class JavaTest {
 
         String classPath = this.classPath + ":" + submission.getWorking().getUnmaskedPath("bin");
         for (String className : tests.getClasses("")) {
-            Data results = JUnitRunner.runTest(className, classPath);
+            Data results = JUnitRunner.runTest(className, classPath, new File("."));
             submission.getResults().set("tests." + className.replace(".", "\\."), results);
         }
 

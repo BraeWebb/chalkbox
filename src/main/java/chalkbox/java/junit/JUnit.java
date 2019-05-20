@@ -75,7 +75,7 @@ public class JUnit {
 
     @Pipe(stream = "submissions")
     public Collection runTests(Collection submission) {
-        String[] testClasses = new String[]{"passengers.PassengerTest", "stops.StopTest"};
+        String[] testClasses = new String[]{"network.NetworkTest"};
         Bundle junitBundle = submission.getSource().getBundle("test");
 
         StringWriter output = new StringWriter();
@@ -96,10 +96,11 @@ public class JUnit {
             return submission;
         }
 
+        File working = new File(submission.getSource().getUnmaskedPath());
         for (String solution : classPaths.keySet()) {
             String classPath = classPaths.get(solution) + ":" + submission.getWorking().getUnmaskedPath();
             for (String testClass : testClasses) {
-                Data results = JUnitRunner.runTest(testClass, classPath);
+                Data results = JUnitRunner.runTest(testClass, classPath, working);
                 String jsonRoot = SOLUTIONS_ROOT + "." + solution + "." + testClass.replace(".", "\\.");
                 submission.getResults().set(jsonRoot, results);
             }

@@ -13,6 +13,7 @@ import chalkbox.java.compilation.IndividualJavaCompiler;
 import org.json.simple.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,8 @@ public class IndividualJavaTest extends JavaTest {
 
     private Map<String, String> classPaths = new HashMap<>();
 
+    private Bundle tests;
+
     @Prior
     public void buildClassPath(Map<String, String> config) {
         File solutionFolder = new File(tempResults + File.separator + "solution");
@@ -36,6 +39,8 @@ public class IndividualJavaTest extends JavaTest {
         for (File clazz : classes) {
             classPaths.put(FileLoader.truncatePath(solutionFolder, clazz), clazz.getPath());
         }
+
+        tests = new Bundle(new File(testPath));
     }
 
     @Pipe(stream = "submissions")
@@ -44,7 +49,14 @@ public class IndividualJavaTest extends JavaTest {
             return submission;
         }
 
-        Bundle tests = new Bundle(new File(testPath));
+        try {
+            submission.getWorking().copyFolder(new File("."));
+        } catch (IOException e) {
+            submission.getResults().set("tests.error.errors",
+                    "Unable to populate working directory");
+        }
+
+        File working = new File(submission.getWorking().getUnmaskedPath());
 
         for (String className : tests.getClasses("")) {
             String clazz = className.replace("Test", "");
@@ -60,7 +72,7 @@ public class IndividualJavaTest extends JavaTest {
 
             String classPath = this.classPath + ":" + classPaths.get(clazz)
                     + ":" + submission.getWorking().getUnmaskedPath(clazz);
-            Data results = JUnitRunner.runTest(className, classPath);
+            Data results = JUnitRunner.runTest(className, classPath, working);
             submission.getResults().set(rootJSON, results);
         }
 
