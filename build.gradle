@@ -17,6 +17,8 @@ dependencies {
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     // Reflect for loading class in the GUI
     compile "org.reflections:reflections:0.9.11"
+    // MongoDB Driver
+    compile 'org.mongodb:mongodb-driver:3.4.3'
 }
 
 mainClassName = 'chalkbox.api.ChalkBox'
