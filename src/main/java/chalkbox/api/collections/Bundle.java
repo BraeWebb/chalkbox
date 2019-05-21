@@ -207,6 +207,20 @@ public class Bundle {
     }
 
     /**
+     * @return The absolute path of the bundle.
+     */
+    public String getAbsolutePath() {
+        return this.folder.getAbsolutePath();
+    }
+
+    /**
+     * @return The absolute path of the bundle.
+     */
+    public String getAbsolutePath(String uri) {
+        return this.folder.getAbsolutePath() + File.separator + uri;
+    }
+
+    /**
      * Make a directory within this bundle with a given path.
      *
      * @param uri The path relative to the bundle to create.

@@ -9,6 +9,7 @@ import chalkbox.api.collections.Data;
 import chalkbox.api.common.java.Compiler;
 import chalkbox.api.common.java.JUnitRunner;
 import chalkbox.api.files.FileLoader;
+import chalkbox.api.files.SourceFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class JUnit {
     @Prior
     public void compileSolutions(Map<String, String> config) {
         String classPath = config.get("classPath");
-        File outputFolder = new File(config.get("results") + File.separator + "solutions");
+        File outputFolder = new File(config.get("temp") + File.separator + "solutions");
         File solutionsFolder = new File(config.get("junitSolutions"));
 
         outputFolder.mkdirs();
@@ -38,7 +39,7 @@ public class JUnit {
         File[] classes = solutionsFolder.listFiles();
         for (File clazz : classes) {
             Bundle solutionBundle = new Bundle(new File(clazz.getPath()));
-            String solutionOut = output.getUnmaskedPath(clazz.getName());
+            String solutionOut = output.getAbsolutePath(clazz.getName());
 
             try {
                 Compiler.compile(Arrays.asList(solutionBundle.getFiles()),
@@ -81,7 +82,10 @@ public class JUnit {
         StringWriter output = new StringWriter();
         boolean success;
         try {
-            success = Compiler.compile(Arrays.asList(junitBundle.getFiles()),
+            SourceFile[] files = new SourceFile[]{
+                    junitBundle.getFile("network/NetworkTest.java")
+            };
+            success = Compiler.compile(Arrays.asList(files),
                     solutionClassPath, submission.getWorking().getUnmaskedPath(), output);
         } catch (IOException io) {
             submission.getResults().set("junit.compiles", false);
