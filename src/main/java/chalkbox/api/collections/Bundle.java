@@ -246,6 +246,7 @@ public class Bundle {
 
         try (Stream<Path> stream = Files.walk(src.toPath())) {
             stream.forEachOrdered(sourcePath -> {
+                sourcePath = sourcePath.toAbsolutePath();
                 try {
                     Files.copy(
                             /*Source Path*/
