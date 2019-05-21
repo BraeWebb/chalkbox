@@ -19,6 +19,8 @@ dependencies {
     compile "org.reflections:reflections:0.9.11"
     // MongoDB Driver
     compile 'org.mongodb:mongodb-driver:3.4.3'
+    // File IO library for copying directories
+    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
 }
 
 mainClassName = 'chalkbox.api.ChalkBox'

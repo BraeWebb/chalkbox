@@ -3,6 +3,7 @@ package chalkbox.api.collections;
 import chalkbox.api.files.FileLoader;
 import chalkbox.api.files.FileSourceFile;
 import chalkbox.api.files.SourceFile;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -244,20 +245,7 @@ public class Bundle {
     public void copyFolder(File src) throws IOException {
         File dest = folder;
 
-        try (Stream<Path> stream = Files.walk(src.toPath())) {
-            stream.forEachOrdered(sourcePath -> {
-                sourcePath = sourcePath.toAbsolutePath();
-                try {
-                    Files.copy(
-                            /*Source Path*/
-                            sourcePath,
-                            /*Destination Path */
-                            src.toPath().resolve(dest.toPath().relativize(sourcePath)));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
+        FileUtils.copyDirectory(src, dest);
     }
 
     /**
