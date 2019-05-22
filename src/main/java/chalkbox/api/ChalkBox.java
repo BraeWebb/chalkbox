@@ -234,7 +234,9 @@ public class ChalkBox {
             }
 
             try {
-                field.set(instance, config.get(key));
+                if (config.containsKey(key)) {
+                    field.set(instance, config.get(key));
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 hasError = true;

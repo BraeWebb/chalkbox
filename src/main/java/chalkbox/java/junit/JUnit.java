@@ -56,7 +56,7 @@ public class JUnit {
     @Prior
     public void compileSolution(Map<String, String> config) {
         String classPath = config.get("classPath");
-        File outputFolder = new File(config.get("results") + File.separator + "fullSolution");
+        File outputFolder = new File(config.get("temp") + File.separator + "fullSolution");
         File solutionFolder = new File(config.get("solution"));
 
         outputFolder.mkdirs();
@@ -76,14 +76,15 @@ public class JUnit {
 
     @Pipe(stream = "submissions")
     public Collection runTests(Collection submission) {
-        String[] testClasses = new String[]{"network.NetworkTest"};
+        String[] testClasses = new String[]{"stops.StopTest", "passengers.PassengerTest"};
         Bundle junitBundle = submission.getSource().getBundle("test");
 
         StringWriter output = new StringWriter();
         boolean success;
         try {
             SourceFile[] files = new SourceFile[]{
-                    junitBundle.getFile("network/NetworkTest.java")
+                    junitBundle.getFile("stops/StopTest.java"),
+                    junitBundle.getFile("passengers/PassengerTest.java")
             };
             success = Compiler.compile(Arrays.asList(files),
                     solutionClassPath, submission.getWorking().getUnmaskedPath(), output);
@@ -104,7 +105,7 @@ public class JUnit {
         for (String solution : classPaths.keySet()) {
             String classPath = classPaths.get(solution) + ":" + submission.getWorking().getUnmaskedPath();
             for (String testClass : testClasses) {
-                Data results = JUnitRunner.runTest(testClass, classPath, working);
+                Data results = JUnitRunner.runTest(testClass, classPath, new File("."));
                 String jsonRoot = SOLUTIONS_ROOT + "." + solution + "." + testClass.replace(".", "\\.");
                 submission.getResults().set(jsonRoot, results);
             }

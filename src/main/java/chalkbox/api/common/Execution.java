@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -26,6 +27,29 @@ public class Execution {
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.directory(working);
 
+        return run(builder, timeout);
+    }
+
+    /**
+     * Execute a process in a working directory with a set of environment variables
+     *
+     * @param environment environment variables
+     * @param timeout timeout for the process in miliseconds
+     * @param args the command line arguments to execute the process
+     * @return the executed process
+     * @throws IOException if an issue occurs executing the process
+     */
+    public static Process runProcess(Map<String, String> environment,
+                                     int timeout, String... args)
+            throws IOException, TimeoutException {
+        ProcessBuilder builder = new ProcessBuilder(args);
+        builder.environment().putAll(environment);
+
+        return run(builder, timeout);
+    }
+
+    private static Process run(ProcessBuilder builder, int timeout)
+            throws IOException, TimeoutException {
         Process process;
         try {
             process = builder.start();
