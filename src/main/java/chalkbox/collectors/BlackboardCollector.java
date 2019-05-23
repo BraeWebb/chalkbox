@@ -45,13 +45,15 @@ public class BlackboardCollector {
                 Collection collection = data.getOrDefault(sid, new Collection(submissionData));
                 data.put(sid, collection);
 
-                // TODO: Fix the parsing of filenames to handle multiple files
-                // URGENT - i.e 10am tomorrow morning
-                InputStream fileStream = zip.getInputStream(
-                        zip.getEntry(submissionData.get("\tFilename").toString()));
-                File outputFile = new File(collection.getWorking()
-                        .getUnmaskedPath(submissionData.get("\tOriginal filename").toString()));
-                Files.copy(fileStream, outputFile.toPath());
+                for (String file : submissionData.keys("files")) {
+                    String key = "files." + file.replace(".", "\\.");
+
+                    InputStream fileStream = zip.getInputStream(
+                            zip.getEntry(submissionData.get(key).toString()));
+                    File outputFile = new File(collection.getWorking()
+                            .getUnmaskedPath(file));
+                    Files.copy(fileStream, outputFile.toPath());
+                }
                 collection.getWorking().refresh();
             }
         }
@@ -92,7 +94,10 @@ public class BlackboardCollector {
     private static Data readSubmissionFile(String submissionFile) {
         String[] brokenFile = submissionFile.split("\n");
         String lastKey = null;
+        String currentFile = "unnamed";
         Data data = new Data();
+
+        Data files = new Data();
 
         for (String line : brokenFile) {
             if (line.isEmpty()) {
@@ -102,7 +107,13 @@ public class BlackboardCollector {
             // handle one-line key-pair value
             if (line.contains(": ")) {
                 String[] map = line.split(": ", 2);
-                data.set(map[0], map[1]);
+                if (map[0].equals("\tOriginal filename")) {
+                    currentFile = map[1].replace(".", "\\.");
+                } else if (map[0].equals("\tFilename")) {
+                    files.set(currentFile, map[1]);
+                } else {
+                    data.set(map[0], map[1]);
+                }
                 // multi-line key
             } else if (line.contains(":")) {
                 lastKey = line.split(":")[0];
@@ -115,6 +126,8 @@ public class BlackboardCollector {
                 }
             }
         }
+
+        data.set("files", files);
 
         // Extract the student number
         Pattern pattern = Pattern.compile("\\((.*)\\)");
