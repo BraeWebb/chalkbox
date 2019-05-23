@@ -85,6 +85,9 @@ public class Data {
         if (json instanceof JSONObject) {
             return ((JSONObject) json).keySet();
         }
+        if (json instanceof Data) {
+            return ((Data) json).keys();
+        }
         return new HashSet<>();
     }
 
@@ -120,7 +123,12 @@ public class Data {
             if (!json.containsKey(keyValue)) {
                 return null;
             } else {
-                json = (JSONObject) json.get(keyValue);
+                Object inner = json.get(keyValue);
+                if (inner instanceof JSONObject) {
+                    json = (JSONObject) inner;
+                } else if (inner instanceof Data) {
+                    json = ((Data) inner).json;
+                }
             }
         }
         return json.get(keys[keys.length - 1].replace("\\.", "."));
