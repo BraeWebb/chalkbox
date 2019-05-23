@@ -12,5 +12,7 @@ solution=/Users/brae/projects/csse2002/marker/environments/ass1/expected
 # Sample solutions to run the students JUnit tests on
 junitSolutions=./sample/solutions
 
+classes=stops.StopTest|passengers.PassengerTest
+
 # Temporary directory for shared compiled classes
 temp=./sample/output

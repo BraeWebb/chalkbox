@@ -1,5 +1,7 @@
 package chalkbox.java.junit;
 
+import chalkbox.api.annotations.ConfigItem;
+import chalkbox.api.annotations.DataSet;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Processor;
@@ -14,8 +16,10 @@ import chalkbox.api.files.SourceFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Processor
@@ -25,6 +29,9 @@ public class JUnit {
 
     private String solutionClassPath;
     private Map<String, String> classPaths = new HashMap<>();
+
+    @ConfigItem(description = "JUnit classes to execute, separated by |")
+    public String classes;
 
     @Prior
     public void compileSolutions(Map<String, String> config) {
@@ -76,18 +83,19 @@ public class JUnit {
 
     @Pipe(stream = "submissions")
     public Collection runTests(Collection submission) {
-        String[] testClasses = new String[]{"stops.StopTest", "passengers.PassengerTest"};
+        String[] testClasses = classes.split("\\|");
         Bundle junitBundle = submission.getSource().getBundle("test");
 
         StringWriter output = new StringWriter();
         boolean success;
         try {
-            SourceFile[] files = new SourceFile[]{
-                    junitBundle.getFile("stops/StopTest.java"),
-                    junitBundle.getFile("passengers/PassengerTest.java")
-            };
-            success = Compiler.compile(Arrays.asList(files),
-                    solutionClassPath, submission.getWorking().getUnmaskedPath(), output);
+            List<SourceFile> files = new ArrayList<>();
+            for (String className : testClasses) {
+                String fileName = className.replace(".", "/") + ".java";
+                files.add(junitBundle.getFile(fileName));
+            }
+            success = Compiler.compile(files, solutionClassPath,
+                    submission.getWorking().getUnmaskedPath(), output);
         } catch (IOException io) {
             submission.getResults().set("junit.compiles", false);
             submission.getResults().set("junit.error", "IO Compile Error - See tutor");
@@ -105,7 +113,7 @@ public class JUnit {
         for (String solution : classPaths.keySet()) {
             String classPath = classPaths.get(solution) + ":" + submission.getWorking().getUnmaskedPath();
             for (String testClass : testClasses) {
-                Data results = JUnitRunner.runTest(testClass, classPath, new File("."));
+                Data results = JUnitRunner.runTest(testClass, classPath, working);
                 String jsonRoot = SOLUTIONS_ROOT + "." + solution + "." + testClass.replace(".", "\\.");
                 submission.getResults().set(jsonRoot, results);
             }
