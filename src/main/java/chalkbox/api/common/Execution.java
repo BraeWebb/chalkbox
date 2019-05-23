@@ -31,7 +31,7 @@ public class Execution {
     }
 
     /**
-     * Execute a process in a working directory with a set of environment variables
+     * Execute a process with a set of environment variables
      *
      * @param environment environment variables
      * @param timeout timeout for the process in miliseconds
@@ -48,6 +48,29 @@ public class Execution {
         return run(builder, timeout);
     }
 
+    /**
+     * Execute a process in a working directory with a set of environment variables
+     *
+     * @param working directory to run the process within
+     * @param environment environment variables
+     * @param timeout timeout for the process in miliseconds
+     * @param args the command line arguments to execute the process
+     * @return the executed process
+     * @throws IOException if an issue occurs executing the process
+     */
+    public static Process runProcess(File working, Map<String, String> environment,
+                                     int timeout, String... args)
+            throws IOException, TimeoutException {
+        ProcessBuilder builder = new ProcessBuilder(args);
+        builder.directory(working);
+        builder.environment().putAll(environment);
+
+        return run(builder, timeout);
+    }
+
+    /*
+     * Helper to execute a process.
+     */
     private static Process run(ProcessBuilder builder, int timeout)
             throws IOException, TimeoutException {
         Process process;
