@@ -7,6 +7,7 @@ import chalkbox.api.collections.Collection;
 import chalkbox.api.collections.Data;
 import chalkbox.api.common.Execution;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,10 +27,11 @@ public class Splat {
         Data feedback = collection.getResults();
         Map<String, String> environment = new HashMap<>();
         environment.put("PYTHONPATH", splat);
+        File working = new File(splat + File.separator + "splat_analysis");
 
         Process process;
         try {
-            process = Execution.runProcess(environment, 10000,
+            process = Execution.runProcess(working, environment, 10000,
                     PYTHON, "-m", "splat_analysis.cmd",
                     collection.getWorking().getUnmaskedPath(), "-all");
         } catch (IOException e) {
@@ -42,11 +44,17 @@ public class Splat {
             return collection;
         }
 
-        System.out.println(Execution.readStream(process.getInputStream()));
-        System.out.println(Execution.readStream(process.getErrorStream()));
+        String output = Execution.readStream(process.getInputStream());
+        output = output.replace("marking_static_criteria.json", "");
+        output = output.replace("marking_rubric_convert.json", "");
 
-        collection.getWorking().refresh();
-        System.out.println(collection.getWorking().getFileNames());
+        Data out = new Data(output);
+
+        if (out.get("rubric") != null) {
+            feedback.set("style", out.get("rubric"));
+        }
+
+        feedback.set("splat", out);
 
         return collection;
     }

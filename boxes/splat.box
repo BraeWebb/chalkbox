@@ -1,6 +1,8 @@
 collector=chalkbox.collectors.BlackboardCollector
 processor=chalkbox.python.Splat
-output=chalkbox.output.DebugOutput
+output=chalkbox.output.SaveJsonOutput
 
 gradebook=./gradebook.zip
 splat=/Users/brae/projects/splat/
+
+json=./json
