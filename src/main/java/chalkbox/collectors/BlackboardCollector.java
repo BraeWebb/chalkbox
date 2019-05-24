@@ -27,6 +27,9 @@ public class BlackboardCollector {
     @ConfigItem(key = "gradebook", description = "Location of the blackboard gradebook")
     public String gradebook;
 
+    @ConfigItem(key = "json", required = false, description = "Location of json files")
+    public String json = null;
+
     @DataSet(stream = "submissions")
     public List<Collection> collect(Map<String, String> config) throws IOException {
         ZipFile zip = new ZipFile(gradebook);
@@ -39,8 +42,11 @@ public class BlackboardCollector {
                 String result = s.hasNext() ? s.next() : "";
 
                 Data submissionData = readSubmissionFile(result);
+                String sid = submissionData.get("sid").toString();
+
+                submissionData = loadData(sid);
+
                 submissionData.set("root", ".");
-                String sid = submissionData.get("Name").toString();
 
                 Collection collection = data.getOrDefault(sid, new Collection(submissionData));
                 data.put(sid, collection);
@@ -59,6 +65,27 @@ public class BlackboardCollector {
         }
 
         return new ArrayList<>(data.values());
+    }
+
+    private Data loadData(String sid) {
+        if (json == null) {
+            return new Data();
+        }
+
+        String jsonPath = json + File.separator + sid + ".json";
+        File file = new File(jsonPath);
+
+        Data data = new Data();
+
+        if (file.exists()) {
+            try {
+                data = new Data(new String(Files.readAllBytes(file.toPath())));
+            } catch (IOException e) {
+                System.err.println("Couldn't read json file: " + file);
+            }
+        }
+
+        return data;
     }
 
 //        for (Map.Entry<Submission, String> entry : zips.entrySet()) {
