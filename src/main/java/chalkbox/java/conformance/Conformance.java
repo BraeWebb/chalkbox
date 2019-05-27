@@ -95,6 +95,11 @@ public class Conformance {
     @Pipe(stream = "submissions")
     public Collection compare(Collection submission) throws IOException {
         Data data = submission.getResults();
+
+        if (!data.is("compilation.compiles")) {
+            return submission;
+        }
+
         SourceLoader submissionLoader = new SourceLoader(submission.getWorking()
                 .getUnmaskedPath("bin"));
         Map<String, Class> submissionMap;

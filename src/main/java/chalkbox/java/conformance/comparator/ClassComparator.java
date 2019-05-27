@@ -3,7 +3,6 @@ package chalkbox.java.conformance.comparator;
 import chalkbox.java.conformance.comparator.flags.Flag;
 import chalkbox.java.conformance.comparator.flags.ListFlag;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -32,10 +31,6 @@ public class ClassComparator extends CodeComparator<Class> {
             ListFlag<String> methodFlag = new ListFlag<>("Class methods do not match!");
             compareMembers(expected.getMethods(), actual.getMethods(), methodFlag);
             flags.add(methodFlag);
-
-            ListFlag<String> constructorFlag = new ListFlag<>("Class constructors do not match!");
-            compareMembers(expected.getConstructors(), actual.getConstructors(), constructorFlag);
-            flags.add(constructorFlag);
         } catch (NoClassDefFoundError ncd) {
             flags.add(new Flag("Failed to load fields: " + ncd.getMessage(), true));
         }
@@ -80,8 +75,6 @@ public class ClassComparator extends CodeComparator<Class> {
             return new FieldComparator((Field) expected, (Field) actual);
         } else if ((expected instanceof Method) && (actual instanceof Method)) {
             return new MethodComparator((Method) expected, (Method) actual);
-        } else if ((expected instanceof Constructor) && (actual instanceof Constructor)) {
-            return new ConstructorComparator((Constructor) expected, (Constructor) actual);
         }
 
         throw new RuntimeException("Unknown comparator types");
