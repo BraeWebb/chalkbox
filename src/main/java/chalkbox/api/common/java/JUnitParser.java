@@ -138,7 +138,11 @@ public class JUnitParser {
                 if (resultsLine == null) {
                     throw new JUnitParseException("Unable to read results line");
                 }
-                test.parseHeader(matcher, resultsLine, in.readLine());
+                try {
+                    test.parseHeader(matcher, resultsLine, in.readLine());
+                } catch (NullPointerException e) {
+                    throw new JUnitParseException("JUnit died when executing tests - call to System.exit?");
+                }
                 continue;
             }
 

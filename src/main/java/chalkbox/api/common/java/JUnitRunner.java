@@ -57,6 +57,7 @@ public class JUnitRunner {
         } catch (JUnitParseException p) {
             System.err.println(output);
             p.printStackTrace();
+            results.set("errors", p.getMessage());
             return results;
         }
 
