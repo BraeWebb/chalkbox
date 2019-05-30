@@ -29,7 +29,7 @@ public class JUnitRunner {
         /* Execute a JUnit process */
         ProcessExecution process;
         try {
-            process = Execution.runProcess(working, 10000, "java", "-cp",
+            process = Execution.runProcess(working, 60000, "java", "-cp",
                     classPath, JUNIT_RUNNER, className);
         } catch (IOException e) {
             e.printStackTrace();
