@@ -89,7 +89,7 @@ public class Execution {
                         InputStreamReader in = new InputStreamReader(process.getInputStream());
                         int bite;
                         while ((bite = in.read()) != -1) {
-                            error.write(bite);
+                            output.write(bite);
                         }
                     } catch (IOException e) {
                         System.err.println("IO ERROR");
@@ -116,8 +116,6 @@ public class Execution {
             errorThread.start();
             if (!process.waitFor(timeout, TimeUnit.MILLISECONDS)) {
                 process.destroy();
-                System.out.println(readStream(process.getInputStream()));
-                System.out.println(readStream(process.getErrorStream()));
                 throw new TimeoutException();
             }
 
