@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -22,7 +24,7 @@ public class Execution {
      * @return the executed process
      * @throws IOException if an issue occurs executing the process
      */
-    public static Process runProcess(File working, int timeout, String... args)
+    public static ProcessExecution runProcess(File working, int timeout, String... args)
             throws IOException, TimeoutException {
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.directory(working);
@@ -39,7 +41,7 @@ public class Execution {
      * @return the executed process
      * @throws IOException if an issue occurs executing the process
      */
-    public static Process runProcess(Map<String, String> environment,
+    public static ProcessExecution runProcess(Map<String, String> environment,
                                      int timeout, String... args)
             throws IOException, TimeoutException {
         ProcessBuilder builder = new ProcessBuilder(args);
@@ -58,7 +60,7 @@ public class Execution {
      * @return the executed process
      * @throws IOException if an issue occurs executing the process
      */
-    public static Process runProcess(File working, Map<String, String> environment,
+    public static ProcessExecution runProcess(File working, Map<String, String> environment,
                                      int timeout, String... args)
             throws IOException, TimeoutException {
         ProcessBuilder builder = new ProcessBuilder(args);
@@ -71,21 +73,65 @@ public class Execution {
     /*
      * Helper to execute a process.
      */
-    private static Process run(ProcessBuilder builder, int timeout)
+    private static ProcessExecution run(ProcessBuilder builder, int timeout)
             throws IOException, TimeoutException {
         Process process;
+        ProcessExecution execution = new ProcessExecution();
         try {
             process = builder.start();
+            Writer output = new StringWriter();
+            Writer error = new StringWriter();
+
+            Runnable outputReader = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        InputStreamReader in = new InputStreamReader(process.getInputStream());
+                        int bite;
+                        while ((bite = in.read()) != -1) {
+                            error.write(bite);
+                        }
+                    } catch (IOException e) {
+                        System.err.println("IO ERROR");
+                    }
+                }
+            };
+            Runnable errorReader = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        InputStreamReader in = new InputStreamReader(process.getErrorStream());
+                        int bite;
+                        while ((bite = in.read()) != -1) {
+                            error.write(bite);
+                        }
+                    } catch (IOException e) {
+                        System.err.println("IO ERROR");
+                    }
+                }
+            };
+            Thread outputThread = new Thread(outputReader);
+            Thread errorThread = new Thread(errorReader);
+            outputThread.start();
+            errorThread.start();
             if (!process.waitFor(timeout, TimeUnit.MILLISECONDS)) {
                 process.destroy();
+                System.out.println(readStream(process.getInputStream()));
+                System.out.println(readStream(process.getErrorStream()));
                 throw new TimeoutException();
             }
+
+            outputThread.join(timeout);
+            errorThread.join(timeout);
+
+            execution.setOutput(output.toString());
+            execution.setError(error.toString());
         } catch (InterruptedException e) {
             System.err.println("Program execution interrupted");
             return null;
         }
 
-        return process;
+        return execution;
     }
 
     /**
@@ -96,7 +142,7 @@ public class Execution {
      * @return the executed process
      * @throws IOException if an issue occurs executing the process
      */
-    public static Process runProcess(int timeout, String... args)
+    public static ProcessExecution runProcess(int timeout, String... args)
             throws IOException, TimeoutException {
         return runProcess(new File("."), timeout, args);
     }

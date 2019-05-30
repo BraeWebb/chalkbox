@@ -2,6 +2,7 @@ package chalkbox.api.common.java;
 
 import chalkbox.api.collections.Data;
 import chalkbox.api.common.Execution;
+import chalkbox.api.common.ProcessExecution;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class JUnitRunner {
         Data results = new Data();
 
         /* Execute a JUnit process */
-        Process process;
+        ProcessExecution process;
         try {
             process = Execution.runProcess(working, 10000, "java", "-cp",
                     classPath, JUNIT_RUNNER, className);
@@ -40,8 +41,8 @@ public class JUnitRunner {
         }
 
         /* Consume the std out and std error */
-        String output = Execution.readStream(process.getInputStream());
-        String errors = Execution.readStream(process.getErrorStream());
+        String output = process.getOutput();
+        String errors = process.getError();
 
         results.set("output", output);
         results.set("errors", errors);

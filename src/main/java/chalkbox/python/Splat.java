@@ -6,6 +6,7 @@ import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
 import chalkbox.api.collections.Data;
 import chalkbox.api.common.Execution;
+import chalkbox.api.common.ProcessExecution;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class Splat {
         environment.put("PYTHONPATH", splat);
         File working = new File(splat + File.separator + "splat_analysis");
 
-        Process process;
+        ProcessExecution process;
         try {
             process = Execution.runProcess(working, environment, 10000,
                     PYTHON, "-m", "splat_analysis.cmd",
@@ -44,7 +45,7 @@ public class Splat {
             return collection;
         }
 
-        String output = Execution.readStream(process.getInputStream());
+        String output = process.getOutput();
         output = output.replace("marking_static_criteria.json", "");
         output = output.replace("marking_rubric_convert.json", "");
 

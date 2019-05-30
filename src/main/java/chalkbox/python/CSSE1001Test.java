@@ -6,6 +6,7 @@ import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
 import chalkbox.api.collections.Data;
 import chalkbox.api.common.Execution;
+import chalkbox.api.common.ProcessExecution;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class CSSE1001Test {
     @Pipe(stream = "submissions")
     public Collection run(Collection collection) {
         Data feedback = collection.getResults();
-        Process process;
+        ProcessExecution process;
         Map<String, String> environment = new HashMap<>();
         environment.put("PYTHONPATH", included);
         File working = new File(collection.getWorking().getUnmaskedPath());
@@ -51,10 +52,10 @@ public class CSSE1001Test {
             return collection;
         }
 
-        String output = Execution.readStream(process.getInputStream());
+        String output = process.getOutput();
         feedback.set("test", new Data(output));
 
-        System.err.println(Execution.readStream(process.getErrorStream()));
+        System.err.println(process.getError());
 
         return collection;
     }
