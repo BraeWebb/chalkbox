@@ -34,7 +34,8 @@ public class UploadMongo {
             Data results = collection.getResults();
             results.set("timestamp", System.currentTimeMillis() / 1000L);
 
-            mongoCollection.insertOne(Document.parse(results.toString()));
+            // TODO: Fix this hack
+            mongoCollection.insertOne(Document.parse(results.toString().replace(".", "-")));
         }
     }
 }
