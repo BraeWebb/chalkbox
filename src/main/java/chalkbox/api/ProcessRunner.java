@@ -9,8 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class ProcessRunner extends Thread {
-    public static final int THREAD_COUNT = 8;
-
     private List<Object> dataSegment;
     private List<Object> updatedSegment = new ArrayList<>();
 
@@ -38,11 +36,12 @@ public class ProcessRunner extends Thread {
         }
     }
 
-    public static List<Object> executeProcess(List<Object> data, Object instance, Method method) {
+    public static List<Object> executeProcess(List<Object> data, Object instance,
+                                              Method method, int threadNumber) {
         List<Object> updated = new ArrayList<>();
 
         AtomicInteger counter = new AtomicInteger();
-        int threadCount = data.size() / THREAD_COUNT;
+        int threadCount = data.size() / threadNumber;
         int threadAmount = threadCount > 0 ? threadCount : 1;
         Collection<List<Object>> split = data.stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / threadAmount))

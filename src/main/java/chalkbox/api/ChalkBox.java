@@ -3,6 +3,7 @@ package chalkbox.api;
 import chalkbox.api.annotations.Collector;
 import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.DataSet;
+import chalkbox.api.annotations.Finish;
 import chalkbox.api.annotations.Output;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Prior;
@@ -224,6 +225,20 @@ public class ChalkBox {
         }
     }
 
+    private void runFinish(Class<?> clazz, Object instance) {
+        for (Method prior : methodsByAnnotation(clazz, Finish.class)) {
+            try {
+                prior.invoke(instance);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                hasError = true;
+            } catch (InvocationTargetException e) {
+                e.getTargetException().printStackTrace();
+                hasError = true;
+            }
+        }
+    }
+
     private void assignConfigItems(Class<?> clazz, Object instance) {
         for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
             ConfigItem annotation = field.getAnnotation(ConfigItem.class);
@@ -330,8 +345,11 @@ public class ChalkBox {
             String stream = pipe.getAnnotation(Pipe.class).stream();
             List<Object> data = streams.get(stream);
 
-            streams.put(stream, ProcessRunner.executeProcess(data, instance, pipe));
+            streams.put(stream, ProcessRunner.executeProcess(data, instance,
+                    pipe, annotation.threads()));
         }
+
+        runFinish(processorClass, instance);
     }
 
     public void sendOutput(Class outputClass) {

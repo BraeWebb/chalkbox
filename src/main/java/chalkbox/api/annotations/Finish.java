@@ -6,11 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A class that performs transformations on a data structure.
+ * An annotation for a method that is executed once when all submissions
+ * have finished being processed by a class.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Processor {
-    Class[] depends() default {};
-    int threads() default 8;
+@Target(ElementType.METHOD)
+public @interface Finish {
 }
