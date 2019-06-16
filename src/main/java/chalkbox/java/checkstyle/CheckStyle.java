@@ -16,9 +16,11 @@ import java.util.concurrent.TimeoutException;
  * Processor to execute the checkstyle tool on a each submission, adding
  * the results of checkstyle to the checkstyle key in the output JSON.
  *
+ * <pre>
  * {
  *     "checkstyle": "[checkstyle output]"
  * }
+ * </pre>
  */
 @Processor
 public class CheckStyle {

@@ -44,7 +44,10 @@ public class BlackboardCollector {
                 Data submissionData = readSubmissionFile(result);
                 String sid = submissionData.get("sid").toString();
 
-                submissionData = loadData(sid);
+                Data loaded = loadData(sid);
+                if (loaded != null) {
+                    submissionData = loaded;
+                }
 
                 submissionData.set("root", ".");
 
@@ -69,7 +72,7 @@ public class BlackboardCollector {
 
     private Data loadData(String sid) {
         if (json == null) {
-            return new Data();
+            return null;
         }
 
         String jsonPath = json + File.separator + sid + ".json";
@@ -82,7 +85,10 @@ public class BlackboardCollector {
                 data = new Data(new String(Files.readAllBytes(file.toPath())));
             } catch (IOException e) {
                 System.err.println("Couldn't read json file: " + file);
+                return null;
             }
+        } else {
+            return null;
         }
 
         return data;
