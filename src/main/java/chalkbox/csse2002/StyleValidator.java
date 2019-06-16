@@ -5,6 +5,7 @@ import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Processor;
 import chalkbox.api.collections.Collection;
+import chalkbox.api.collections.Data;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +70,23 @@ public class StyleValidator {
         String sid = (String) collection.getResults().get("sid");
         String stylePath = styleRoot + File.separator + sid + ".style";
 
+        Data data = collection.getResults();
+        int passingTests = 0;
+        for (String test : data.keys("tests")) {
+            String testKey = "tests." + test.replace(".", "\\.");
+
+            if (data.get(testKey + ".passes") != null) {
+                passingTests += Integer.parseInt(data.get("tests."
+                        + test.replace(".", "\\.") + ".passes").toString());
+            }
+        }
+        float testMarks = (passingTests / 77f) * 55;
+
+        if (testMarks < 5) {
+            System.err.println(sid);
+            return collection;
+        }
+
         /* Attempt to open the style file */
         String style;
         try {
@@ -91,7 +109,8 @@ public class StyleValidator {
         boolean goodFormat = foundCategories.equals(expectedCategories);
         if (!goodFormat) {
             System.err.print(sid + " is missing categories. Found: "
-                    + foundCategories + System.lineSeparator() + style);
+                    + foundCategories + System.lineSeparator() + style
+                    + System.lineSeparator());
         }
 
         return collection;

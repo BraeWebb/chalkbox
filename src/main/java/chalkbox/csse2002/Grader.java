@@ -31,9 +31,12 @@ import java.util.Map;
 public class Grader {
 
     /* TODO: This is currently a constant in case test totals are calculated
-     * correctly by an individual submission */
+      * correctly by an individual submission
+      * the issue here is that if a test isn't run for some reason then we
+      * don't know what the total possible tests are so we can't
+      * calculate the total amount of tests */
     /** Total amount of possible passing tests */
-    private static float TOTAL_TESTS = 162f;
+    private static float TOTAL_TESTS = 77f;
 
     /**
      * Grade a submission.
