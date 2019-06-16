@@ -4,6 +4,7 @@ import chalkbox.api.annotations.Collector;
 import chalkbox.api.annotations.ConfigItem;
 import chalkbox.api.annotations.DataSet;
 import chalkbox.api.annotations.Finish;
+import chalkbox.api.annotations.GroupPipe;
 import chalkbox.api.annotations.Output;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Prior;
@@ -347,6 +348,18 @@ public class ChalkBox {
 
             streams.put(stream, ProcessRunner.executeProcess(data, instance,
                     pipe, annotation.threads()));
+        }
+
+        List<Method> groupPipes = methodsByAnnotation(processorClass, GroupPipe.class);
+        for (Method method : groupPipes) {
+            String stream = method.getAnnotation(GroupPipe.class).stream();
+            List<Object> data = streams.get(stream);
+
+            try {
+                method.invoke(instance, data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         runFinish(processorClass, instance);
