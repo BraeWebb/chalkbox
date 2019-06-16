@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
  * A collector builds the initial data structures from command line parameters.
  *
  * A collector should have at least one {@link DataSet} method.
- * A collector may have one {@link Parser} method.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

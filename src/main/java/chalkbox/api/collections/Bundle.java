@@ -111,11 +111,11 @@ public class Bundle {
      *
      * <p>Examples:
      * <pre>
-     * src/package1/ClassOne.java -> package1.ClassOne
-     * package1/ClassOne.java -> package1.ClassOne
-     * test/package1/ClassOne.java -> package1.ClassOne
-     * src/package1/package2/ClassOne.java -> package1.package2.ClassOne
-     * src/ClassOne.java -> ClassOne
+     * src/package1/ClassOne.java -&gt; package1.ClassOne
+     * package1/ClassOne.java -&gt; package1.ClassOne
+     * test/package1/ClassOne.java -&gt; package1.ClassOne
+     * src/package1/package2/ClassOne.java -&gt; package1.package2.ClassOne
+     * src/ClassOne.java -&gt; ClassOne
      * </pre>
      * @param filePath File path of the class
      * @return The name of the class
@@ -136,8 +136,8 @@ public class Bundle {
      *
      * <p>Examples:
      * <pre>
-     * package1.ClassOne -> package1/ClassOne.java
-     * ClassOne -> ClassOne.java
+     * package1.ClassOne -&gt; package1/ClassOne.java
+     * ClassOne -&gt; ClassOne.java
      * </pre>
      *
      * @param className Name of the class

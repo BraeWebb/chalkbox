@@ -215,7 +215,11 @@ public class ChalkBox {
     private void runPriors(Class<?> clazz, Object instance) {
         for (Method prior : methodsByAnnotation(clazz, Prior.class)) {
             try {
-                prior.invoke(instance, config);
+                if (prior.getParameterCount() > 0) {
+                    prior.invoke(instance, config);
+                } else {
+                    prior.invoke(instance);
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 hasError = true;
