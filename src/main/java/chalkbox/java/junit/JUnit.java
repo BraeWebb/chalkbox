@@ -1,7 +1,6 @@
 package chalkbox.java.junit;
 
 import chalkbox.api.annotations.ConfigItem;
-import chalkbox.api.annotations.DataSet;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Processor;
@@ -14,6 +13,7 @@ import chalkbox.api.files.FileLoader;
 import chalkbox.api.files.SourceFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -21,11 +21,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @Processor
 public class JUnit {
+    private static final Logger LOGGER = Logger.getLogger(JUnit.class.getName());
     private static final String SOLUTIONS_ROOT = "junit.solutions";
-    private static final String SAMPLE_SOLUTION = "solution";
+
+    private Bundle solutionsOutput;
+    private Bundle solutionOutput;
 
     private String solutionClassPath;
     private Map<String, String> classPaths = new HashMap<>();
@@ -33,140 +37,187 @@ public class JUnit {
     @ConfigItem(description = "JUnit classes to execute, separated by |")
     public String classes;
 
+    @ConfigItem(description = "Class path for student tests to be compiled with")
+    public String classPath;
+
+    @ConfigItem(key = "solution",
+            description = "Path to a directory containing the sample solution")
+    public String solution;
+
+    @ConfigItem(key = "junitSolutions",
+            description = "Path to a directory containing various broken sample solutions")
+    public String solutions;
+
+    /**
+     * Creates the compilation output directory.
+     */
     @Prior
-    public void compileSolutions(Map<String, String> config) {
-        String classPath = config.get("classPath");
-        File outputFolder = new File(config.get("temp") + File.separator + "solutions");
-        File solutionsFolder = new File(config.get("junitSolutions"));
+    public void createCompilationOutput() {
+        /* Create a new temporary directory for compilation output */
+        Bundle compilationOutput;
+        try {
+            compilationOutput = new Bundle();
+        } catch (IOException e) {
+            LOGGER.severe("Unable to create compilation output directory");
+            return;
+        }
 
-        outputFolder.mkdirs();
-        Bundle output = new Bundle(outputFolder);
+        /* Create a subdirectory for broken solutions compilation */
+        try {
+            solutionsOutput = compilationOutput.makeBundle("solutions");
+        } catch (IOException e) {
+            LOGGER.severe("Unable to create solutions directory in compilation output directory");
+            return;
+        }
 
-        StringWriter writer = new StringWriter();
-        File[] classes = solutionsFolder.listFiles();
-        for (File clazz : classes) {
-            Bundle solutionBundle = new Bundle(new File(clazz.getPath()));
-            String solutionOut = output.getAbsolutePath(clazz.getName());
-
-            try {
-                Compiler.compile(Arrays.asList(solutionBundle.getFiles()),
-                        classPath, solutionOut, writer);
-            } catch (IOException io) {
-                System.err.println("Failed to compile solution: " + clazz);
-            }
-
-            classPaths.put(FileLoader.truncatePath(solutionsFolder, clazz),
-                    classPath + ":" + solutionOut);
+        /* Create a subdirectory for sample solution compilation */
+        try {
+            solutionOutput = compilationOutput.makeBundle("solution");
+        } catch (IOException e) {
+            LOGGER.severe("Unable to create solution directory in compilation output directory");
         }
     }
 
-    @Prior
-    public void compileSolution(Map<String, String> config) {
-        String classPath = config.get("classPath");
-        File outputFolder = new File(config.get("temp") + File.separator + "fullSolution");
-        File solutionFolder = new File(config.get("solution"));
-
-        outputFolder.mkdirs();
-        Bundle output = new Bundle(outputFolder);
-
-        StringWriter writer = new StringWriter();
-        Bundle solutionBundle = new Bundle(solutionFolder);
+    private void compileSolution(Bundle source, String name, String output,
+                                 StringWriter writer) {
+        /* Collect all the source files to compile */
+        SourceFile[] files;
         try {
-            Compiler.compile(Arrays.asList(solutionBundle.getFiles()),
-                    classPath, output.getUnmaskedPath(), writer);
-        } catch (IOException io) {
-            System.err.println("Failed to compile full solution");
+            files = source.getFiles(".java");
+        } catch (IOException e) {
+            LOGGER.severe("Unable to load the source files within solution");
+            return;
         }
 
-        solutionClassPath = classPath + ":" + output.getUnmaskedPath();
-    }
-
-    @Pipe(stream = "submissions")
-    public Collection runTests(Collection submission) {
-        String[] testClasses = classes.split("\\|");
-        Bundle junitBundle = submission.getSource().getBundle("test");
-
-        StringWriter output = new StringWriter();
-        boolean success;
-        try {
-            List<SourceFile> files = new ArrayList<>();
-            for (String className : testClasses) {
-                String fileName = className.replace(".", "/") + ".java";
-                files.add(junitBundle.getFile(fileName));
-            }
-            success = Compiler.compile(files, solutionClassPath,
-                    submission.getWorking().getUnmaskedPath(), output);
-        } catch (IOException io) {
-            submission.getResults().set("junit.compiles", false);
-            submission.getResults().set("junit.error", "IO Compile Error - See tutor");
-            return submission;
+        /* Compile the solution */
+        boolean compiled = Compiler.compile(Arrays.asList(files),
+                classPath, output, writer);
+        if (!compiled) {
+            LOGGER.severe("Unable to compile solution: " + name);
+            LOGGER.severe(writer.toString());
         }
-
-        submission.getResults().set("junit.compiles", success);
-        submission.getResults().set("junit.output", output.toString());
-
-        if (!success) {
-            return submission;
-        }
-
-        File working = new File(submission.getSource().getUnmaskedPath());
-        for (String solution : classPaths.keySet()) {
-            String classPath = classPaths.get(solution) + ":" + submission.getWorking().getUnmaskedPath();
-            for (String testClass : testClasses) {
-                Data results = JUnitRunner.runTest(testClass, classPath, working);
-                String jsonRoot = SOLUTIONS_ROOT + "." + solution + "." + testClass.replace(".", "\\.");
-                submission.getResults().set(jsonRoot, results);
-            }
-        }
-
-        return submission;
+        LOGGER.finest("Solution " + name + " Compilation Output");
+        LOGGER.finest(writer.toString());
     }
 
     /**
-     * Gives a .correct flag to each broken solution.
-     * .correct is true iff the solution passes fewer tests than the sample solution.
-     *
-     * TODO: Fix this so the flag is set when the test is run
+     * Compile all the broken solutions to test students junit tests on
      */
-    @Pipe(stream = "submissions")
-    public Collection hack(Collection submission) {
-        Data data = submission.getResults();
-        /* Determine the baseline amount of tests that pass for the sample solution */
-        Map<String, Integer> baseline = new HashMap<>();
-        String solutionPath = SOLUTIONS_ROOT + "." + SAMPLE_SOLUTION;
-        for (String clazz : data.keys(solutionPath)) {
-            String solutionKey = solutionPath + "." + clazz.replace(".", "\\.");
-
-            if (data.get(solutionKey + ".passes") == null) {
-                continue;
-            }
-
-            int passes = Integer.parseInt(data.get(solutionKey + ".passes").toString());
-            baseline.put(clazz, passes);
+    @Prior
+    public void compileSolutions() {
+        /* Collect the list of broken solution folders */
+        File solutionsFolder = new File(solutions);
+        File[] solutions = solutionsFolder.listFiles();
+        if (solutions == null) {
+            LOGGER.severe("Unable to load the folder of broken solutions");
+            return;
         }
 
-        /* Flag all the solutions that have a better amount of failing tests */
-        for (String solution : data.keys(SOLUTIONS_ROOT)) {
-            if (solution.equals(SAMPLE_SOLUTION)) {
-                continue;
+        StringWriter writer;
+        for (File solutionFolder : solutions) {
+            String solutionName = FileLoader.truncatePath(solutionsFolder, solutionFolder);
+
+            /* Get the folder for compilation output of this solution */
+            Bundle solutionBundle = new Bundle(new File(solutionFolder.getPath()));
+            String solutionOut = solutionsOutput.getAbsolutePath(solutionFolder.getName());
+
+            writer = new StringWriter();
+            compileSolution(solutionBundle, solutionName, solutionOut, writer);
+
+            /* Add an entry for this solution to the class path mapping */
+            classPaths.put(solutionName, classPath + ":" + solutionOut);
+        }
+    }
+
+    /**
+     * Compile the sample solution.
+     */
+    @Prior
+    public void compileSolution() {
+        Bundle solutionSource = new Bundle(new File(solution));
+
+        /* Compile the sample solution */
+        StringWriter writer = new StringWriter();
+        compileSolution(solutionSource, "sample solution",
+                solutionOutput.getUnmaskedPath(), writer);
+
+        solutionClassPath = classPath + ":" + solutionsOutput.getUnmaskedPath();
+    }
+
+    @Pipe
+    public Collection compileTests(Collection submission) {
+        String[] testClasses = classes.split("\\|");
+        String student = submission.getResults().get("sid").toString();
+        LOGGER.finest("Compiling student tests " + student);
+        LOGGER.finest(Arrays.toString(testClasses));
+
+        Bundle tests = submission.getSource().getBundle("test");
+
+        List<SourceFile> files = new ArrayList<>();
+        for (String className : testClasses) {
+            String fileName = className.replace(".", "/") + ".java";
+            try {
+                files.add(tests.getFile(fileName));
+            } catch (FileNotFoundException e) {
+                submission.getResults().set("junit.compiles", false);
+                submission.getResults().set("junit.error", "JUnit test file " + fileName + " not found");
+                LOGGER.finer("Unable to find a test file (" + fileName + ") for " + student);
+            } catch (IOException e) {
+                submission.getResults().set("junit.compiles", false);
+                submission.getResults().set("junit.error", "IO Compile Error - See tutor");
+                LOGGER.warning("IOException when trying to get " + fileName + " for " + student);
             }
-            String solutionKey = SOLUTIONS_ROOT + "." + solution;
+        }
 
-            for (String clazz : data.keys(solutionKey)) {
-                String testKey = solutionKey + "." + clazz.replace(".", "\\.");
-                data.set(testKey + ".correct", false);
+        StringWriter output = new StringWriter();
+        boolean success = Compiler.compile(files, solutionClassPath,
+                submission.getWorking().getUnmaskedPath(), output);
 
-                if (data.get(testKey + ".passes") == null) {
-                    continue;
-                }
+        submission.getResults().set("junit.compiles", success);
+        submission.getResults().set("junit.output", output.toString());
+        return submission;
+    }
 
-                int passes = Integer.parseInt(data.get(testKey + ".passes").toString());
+    @Pipe
+    public Collection runTests(Collection submission) {
+        String student = submission.getResults().get("sid").toString();
 
-                if (baseline.containsKey(clazz)) {
-                    if (passes < baseline.get(clazz)) {
-                        data.set(testKey + ".correct", true);
+        if (!submission.getResults().is("junit.compiles")) {
+            LOGGER.finest("Skipping running JUnit tests for " + student);
+            return submission;
+        }
+
+        String[] testClasses = classes.split("\\|");
+        LOGGER.finest("Running student tests " + student);
+        LOGGER.finest(Arrays.toString(testClasses));
+        File working = new File(submission.getSource().getUnmaskedPath());
+
+        Map<String, Integer> passes = new HashMap<>();
+        for (String testClass : testClasses) {
+            Data results = JUnitRunner.runTest(testClass, solutionClassPath, working);
+            if (results.get("passes") != null) {
+                passes.put(testClass, Integer.parseInt(results.get("passes").toString()));
+            }
+        }
+
+        for (String solution : classPaths.keySet()) {
+            /* Class path for the particular solution */
+            String classPath = classPaths.get(solution) + ":" + submission.getWorking().getUnmaskedPath();
+
+            for (String testClass : testClasses) {
+                String jsonRoot = SOLUTIONS_ROOT + "." + solution + "."
+                        + testClass.replace(".", "\\.");
+
+                /* Run the JUnit tests */
+                Data results = JUnitRunner.runTest(testClass, classPath, working);
+                results.set("correct", false);
+                if (results.get("passes") != null) {
+                    int passed = Integer.parseInt(results.get("passes").toString());
+                    if (passed < passes.get(testClass)) {
+                        results.set("correct", true);
                     }
                 }
+                submission.getResults().set(jsonRoot, results);
             }
         }
 

@@ -232,11 +232,30 @@ public class Bundle {
         }
 
         File file = new File(getUnmaskedPath(uri));
-        if (file.mkdir()) {
-            return true;
+        return file.mkdir();
+    }
+
+    /**
+     * Make a directory within this bundle and return the given bundle.
+     *
+     * @param uri The path relative to the bundle to create.
+     * @return the of the subdirectory.
+     *
+     * @throws IOException if a subdirectory could not be make or if the bundle
+     *                      could not be loaded.
+     */
+    public Bundle makeBundle(String uri) throws IOException {
+        if (!makeDir(uri)) {
+            throw new IOException("Unable to create the subdirectory");
         }
 
-        return false;
+        Bundle bundle;
+        try {
+            bundle = new Bundle(new File(getUnmaskedPath(uri)));
+        } catch (NullPointerException e) {
+            throw new IOException("Unable to load a bundle for the subdirectory");
+        }
+        return bundle;
     }
 
     /**
