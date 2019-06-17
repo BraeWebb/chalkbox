@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Processor {
+    String description() default "No description provided for this processor";
     Class[] depends() default {};
     int threads() default 8;
 }

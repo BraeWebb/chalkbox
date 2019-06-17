@@ -389,11 +389,27 @@ public class ChalkBox {
 
     public static String classHelp(String className) {
         StringBuilder builder = new StringBuilder();
+        builder.append(className).append(System.lineSeparator());
         Class clazz;
         try {
             clazz = Class.forName(className);
         } catch (ClassNotFoundException cnf) {
             return "Unable to find class: " + className;
+        }
+
+        Collector collector = (Collector) clazz.getAnnotation(Collector.class);
+        if (collector != null) {
+            builder.append(collector.description())
+                    .append(System.lineSeparator());
+        }
+        Processor processor = (Processor) clazz.getAnnotation(Processor.class);
+        StringBuilder dependants = new StringBuilder();
+        if (processor != null) {
+            builder.append(processor.description())
+                    .append(System.lineSeparator());
+            for (Class dependency : processor.depends()) {
+                dependants.append("Depends on ").append(classHelp(dependency.getName()));
+            }
         }
 
         for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
@@ -405,7 +421,8 @@ public class ChalkBox {
                 key = field.getName();
             }
 
-            builder.append(key).append(": ").append(annotation.description())
+            builder.append("\t").append(key).append(": ")
+                    .append(annotation.description())
                     .append(System.lineSeparator());
         }
 
@@ -419,8 +436,6 @@ public class ChalkBox {
                 return;
             }
 
-            System.out.println("Config Items for " + args[1]);
-            System.out.println();
             System.out.println(classHelp(args[1]));
             return;
         }
