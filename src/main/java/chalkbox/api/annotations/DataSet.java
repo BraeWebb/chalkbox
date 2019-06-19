@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface DataSet {
-    String stream();
+    String stream() default "submissions";
     Class type() default Collection.class;
 }

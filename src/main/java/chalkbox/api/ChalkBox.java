@@ -325,6 +325,8 @@ public class ChalkBox {
                 System.err.println(e);
             }
         }
+
+        runFinish(collectorClass, instance);
     }
 
     public void executeProcess(Class processorClass) {
