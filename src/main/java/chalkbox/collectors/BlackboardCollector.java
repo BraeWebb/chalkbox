@@ -38,6 +38,9 @@ public class BlackboardCollector {
 
         for (ZipEntry entry : zip.stream().collect(Collectors.toList())) {
             if (entry.getName().endsWith(".txt")) {
+                if (entry.getName().split("_").length != 4) {
+                    continue;
+                }
                 Scanner s = new Scanner(zip.getInputStream(entry)).useDelimiter("\\A");
                 String result = s.hasNext() ? s.next() : "";
 
