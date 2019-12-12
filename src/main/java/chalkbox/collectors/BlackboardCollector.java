@@ -148,7 +148,9 @@ public class BlackboardCollector {
                 } else if (map[0].equals("\tFilename")) {
                     files.set(currentFile, map[1]);
                 } else {
-                    data.set(map[0], map[1]);
+                    if (!data.keys().contains(map[0])) {
+                        data.set(map[0], map[1]);
+                    }
                 }
                 // multi-line key
             } else if (line.contains(":")) {
