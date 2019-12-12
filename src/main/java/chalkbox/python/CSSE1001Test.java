@@ -36,6 +36,7 @@ public class CSSE1001Test {
 
         try {
             collection.getWorking().copyFolder(new File(included));
+            collection.getWorking().copyFolder(new File(collection.getSource().getUnmaskedPath()));
         } catch (IOException e) {
             feedback.set("test.error", "Unable to copy supplied directory");
             return collection;
@@ -43,7 +44,7 @@ public class CSSE1001Test {
 
         try {
             process = Execution.runProcess(working, environment, 10000,
-                    PYTHON, "-m", runner, "--json");
+                    PYTHON, runner, "--json");
         } catch (IOException e) {
             feedback.set("test.error", "IOException occurred");
             return collection;
@@ -56,6 +57,20 @@ public class CSSE1001Test {
         feedback.set("test", new Data(output));
 
         System.err.println(process.getError());
+
+        try {
+            process = Execution.runProcess(working, environment, 10000,
+                    PYTHON, runner);
+        } catch (IOException e) {
+            feedback.set("test.error", "IOException occurred");
+            return collection;
+        } catch (TimeoutException e) {
+            feedback.set("test.error", "Timed out executing tests");
+            return collection;
+        }
+
+        output = process.getOutput();
+        feedback.set("output", output);
 
         return collection;
     }
