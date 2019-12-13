@@ -1,0 +1,14 @@
+name: Gradle Build and Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Tests with Gradle
+    - uses: actions/checkout@master
+    - uses: MrRamych/gradle-actions/openjdk-12@3.1
+    
+      with:
+        args: test
