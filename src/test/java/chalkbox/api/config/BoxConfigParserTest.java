@@ -4,19 +4,21 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import static org.junit.Assert.*;
 
 public class BoxConfigParserTest {
 
     private static final String SIMPLE_CONFIG = new StringBuilder()
-            .append("key1=value1")
-            .append("key2=value2")
-            .append("key3=value3")
-            .append("mykey=hello")
-            .append("theirs=world")
+            .append("key1=value1\n")
+            .append("key2=value2\n")
+            .append("key3=value3\n")
+            .append("mykey=hello\n")
+            .append("theirs=world\n")
             .toString();
 
     @Test(expected = ConfigParseException.class)
@@ -61,10 +63,13 @@ public class BoxConfigParserTest {
     public void testPathReadBasicValue()
             throws ConfigParseException, IOException {
         File file = File.createTempFile("testPathReadBasicValue", ".box");
+        OutputStream stream = new FileOutputStream(file);
+        stream.write(SIMPLE_CONFIG.getBytes());
+        stream.flush();
         file.deleteOnExit();
 
         ConfigParser parser = ConfigParser.box();
-        ChalkboxConfig config = parser.read(file.getPath());
+        ChalkboxConfig config = parser.read(file.toPath());
         basicValue(config);
     }
 
@@ -72,10 +77,13 @@ public class BoxConfigParserTest {
     public void testPathReadBasicIsSet()
             throws ConfigParseException, IOException {
         File file = File.createTempFile("testPathReadBasicIsSet", ".box");
+        OutputStream stream = new FileOutputStream(file);
+        stream.write(SIMPLE_CONFIG.getBytes());
+        stream.flush();
         file.deleteOnExit();
 
         ConfigParser parser = ConfigParser.box();
-        ChalkboxConfig config = parser.read(file.getPath());
+        ChalkboxConfig config = parser.read(file.toPath());
         basicValue(config);
     }
 

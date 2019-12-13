@@ -9,12 +9,7 @@ import java.nio.file.Path;
  * Example usage: Parsing a box file called mybox.box in the working directory.
  * {@code
  * ConfigParser parser = ConfigParser.box();
- * ChalkboxConfig config = parser.read(Path.from("./mybox.box"));
- *
- * // Don't forget to check for errors
- * if (config == null) {
- *     log(config.errors());
- * }
+ * ChalkboxConfig config = parser.read(Paths.of("./mybox.box"));
  * }
  */
 public interface ConfigParser {
@@ -22,7 +17,7 @@ public interface ConfigParser {
      * @return An instance of config parser designed for parsing box files.
      */
     static ConfigParser box() {
-        return null;
+        return new BoxConfigParser();
     }
 
     /**
