@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+//todo(issue:#21) Refactor this to not be in CSSE2002, should be java
 /**
  * A process for validating the format of .style files.
  *

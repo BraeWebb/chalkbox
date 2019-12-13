@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+//todo(issue:#21) Refactor this to not be in CSSE2002, should be generic
 /**
  * Process that distributes style marking to tutors in the form of zips.
  *

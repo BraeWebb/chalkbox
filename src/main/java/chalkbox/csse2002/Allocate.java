@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
+//todo(issue:#21) Refactor this to not be in CSSE2002, should be generic
 /**
  * Process to assign allocated tutors based on a CSV containing the allocation.
  *

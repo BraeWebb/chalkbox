@@ -10,6 +10,12 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+    todo(issue:#21) Refactor this to not be in CSSE2002, should be generic
+    We can make this more generic by allowing lua or similar to be embedded
+    in the config file.
+ */
+
 /**
  * Grader to calculate the grade of CSSE2002 Assignments.
  *

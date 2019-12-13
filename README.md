@@ -1,8 +1,12 @@
 # Chalkbox
 
+## User Guide
+
 The user/developer guide is here: https://docs.braewebb.com/guides/chalkbox.pdf This guide is intended to help you get Chalkbox installed and ready to run submissions.
 Chalkbox is a really big tool which you don't need to understand most of because it works for a lot of courses but the full documentation is here: https://docs.braewebb.com/chalkbox/.
 A box file is used to configure how chalkbox processes submissions.
+
+## Configuration
 
 Below is a description of each of the lines of an example box file.  
 BlackboardCollector is a built in Chalkbox collector that reads and extracts submissions from a downloaded blackboard submissions zip.  
@@ -20,6 +24,8 @@ Name of the test file (for this assignment it is test_a2.py)
 `runner=test_a2.py`  
 Included is a directory that has all its contents included with the students submission when it is tested.  
 `included=ass2/queens`
+
+## Feedback Uploading
 
 Uploading Chalkbox results into blackboard is currently awkward. Chalkbox was designed for Whiteboard so does not have an in-built blackboard exporter.
 There is a hacked together Python script that can upload results to blackboard. It requires modification for each assignment.

@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//todo(issue:#21) Refactor this to not be in CSSE2002, should be java
 /**
  * A process for reading .style files into the JSON submission as grades.
  *

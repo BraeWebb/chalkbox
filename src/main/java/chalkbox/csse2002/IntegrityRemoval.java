@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+//todo(issue:#21) Refactor this to not be in CSSE2002, should be generic
 /**
  * Flag all the students under integrity investigation with a flag.
  *
