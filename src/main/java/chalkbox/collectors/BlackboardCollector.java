@@ -23,14 +23,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 @Collector
-public class BlackboardCollector {
+public class BlackboardCollector extends LoadSubmissionData {
     @ConfigItem(key = "gradebook", description = "Location of the blackboard gradebook")
     public String gradebook;
 
-    @ConfigItem(key = "json", required = false, description = "Location of json files")
-    public String json = null;
-
-    @DataSet(stream = "submissions")
+    @DataSet
     public List<Collection> collect(Map<String, String> config) throws IOException {
         ZipFile zip = new ZipFile(gradebook);
 
@@ -47,10 +44,7 @@ public class BlackboardCollector {
                 Data submissionData = readSubmissionFile(result);
                 String sid = submissionData.get("sid").toString();
 
-                Data loaded = loadData(sid);
-                if (loaded != null) {
-                    submissionData = loaded;
-                }
+                submissionData = loadData(sid, submissionData);
 
                 submissionData.set("root", ".");
 
@@ -72,49 +66,6 @@ public class BlackboardCollector {
 
         return new ArrayList<>(data.values());
     }
-
-    private Data loadData(String sid) {
-        if (json == null) {
-            return null;
-        }
-
-        String jsonPath = json + File.separator + sid + ".json";
-        File file = new File(jsonPath);
-
-        Data data = new Data();
-
-        if (file.exists()) {
-            try {
-                data = new Data(new String(Files.readAllBytes(file.toPath())));
-            } catch (IOException e) {
-                System.err.println("Couldn't read json file: " + file);
-                return null;
-            }
-        } else {
-            return null;
-        }
-
-        return data;
-    }
-
-//        for (Map.Entry<Submission, String> entry : zips.entrySet()) {
-//            if (entry.getValue() == null) {
-//                continue;
-//            }
-//
-//            BlackboardSubmission submission = (BlackboardSubmission) entry.getKey();
-//            ZipFile studentZip;
-//            try {
-//                studentZip = innerZip(zip, entry.getValue());
-//                submission.loadZip(studentZip);
-//            } catch (IOException io) {
-//                logger.log("Unable to open zip");
-//                logger.log(entry.getValue());
-//            }
-//
-//            submission.setSchema(new Schema(submission.getFileNames()));
-//        }
-//    }
 
     // Because unzipping a zip in java is equally stupid
     // source: https://stackoverflow.com/questions/11287486/read-a-zip-file-inside-zip-file
