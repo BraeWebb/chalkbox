@@ -27,3 +27,8 @@ gradle-app.setting
 
 sample
 docs/
+
+## VSCode Bullshit
+.classpath
+.project
+.settings
