@@ -38,6 +38,9 @@ public class BlackboardCollector {
 
         for (ZipEntry entry : zip.stream().collect(Collectors.toList())) {
             if (entry.getName().endsWith(".txt")) {
+                if (entry.getName().split("_").length != 4) {
+                    continue;
+                }
                 Scanner s = new Scanner(zip.getInputStream(entry)).useDelimiter("\\A");
                 String result = s.hasNext() ? s.next() : "";
 
@@ -145,7 +148,9 @@ public class BlackboardCollector {
                 } else if (map[0].equals("\tFilename")) {
                     files.set(currentFile, map[1]);
                 } else {
-                    data.set(map[0], map[1]);
+                    if (!data.keys().contains(map[0])) {
+                        data.set(map[0], map[1]);
+                    }
                 }
                 // multi-line key
             } else if (line.contains(":")) {
