@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -95,7 +97,7 @@ public class BoxConfigParserTest {
         assertEquals("world", config.value("theirs"));
     }
 
-    private void basicIsSet(ChalkboxConfig config) throws ConfigParseException {
+    private void basicIsSet(ChalkboxConfig config) {
         assertTrue(config.isSet("key1"));
         assertTrue(config.isSet("key2"));
         assertTrue(config.isSet("key3"));
@@ -106,5 +108,20 @@ public class BoxConfigParserTest {
         assertFalse(config.isSet("key4"));
         assertFalse(config.isSet("hello"));
         assertFalse(config.isSet("world"));
+    }
+
+    @Test
+    public void testMapConversion() throws ConfigParseException {
+        ConfigParser parser = ConfigParser.box();
+        ChalkboxConfig config = parser.read(SIMPLE_CONFIG);
+
+        Map<String, String> expected = new HashMap<>();
+        expected.put("key1", "value1");
+        expected.put("key2", "value2");
+        expected.put("key3", "value3");
+        expected.put("mykey", "hello");
+        expected.put("theirs", "world");
+
+        assertEquals(expected, config.toMap());
     }
 }

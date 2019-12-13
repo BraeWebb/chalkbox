@@ -1,5 +1,7 @@
 package chalkbox.api.config;
 
+import java.util.Map;
+
 /**
  * Interface of the chalkbox configuration settings.
  *
@@ -24,4 +26,14 @@ public interface ChalkboxConfig {
      * @return True if a value has been assigned to the given key, else False.
      */
     boolean isSet(String key);
+
+    /**
+     * Convert the configuration into a map of string keys to string values.
+     *
+     * <strong>This type of map is the default input to processors so this is
+     * an important requiredment.</strong>
+     *
+     * @return A chalkbox config converted into a mapping from keys to values.
+     */
+    Map<String, String> toMap();
 }

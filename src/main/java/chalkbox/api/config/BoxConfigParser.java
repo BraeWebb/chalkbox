@@ -109,5 +109,10 @@ class BoxConfigParser implements ConfigParser {
         public boolean isSet(String key) {
             return config.containsKey(key);
         }
+
+        @Override
+        public Map<String, String> toMap() {
+            return new HashMap<>(config);
+        }
     }
 }
