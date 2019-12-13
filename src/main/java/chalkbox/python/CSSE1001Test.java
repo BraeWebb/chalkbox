@@ -65,7 +65,7 @@ public class CSSE1001Test {
             process = Execution.runProcess(working, environment, 10000,
                     PYTHON, runner);
         } catch (IOException e) {
-            System.err.println("Error occurred trying to spawn the test runner process (in json mode)");
+            System.err.println("Error occurred trying to spawn the test runner process");
             e.printStackTrace();
             feedback.set("test.error", "IOException occurred");
             return collection;
