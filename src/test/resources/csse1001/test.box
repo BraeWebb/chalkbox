@@ -1,0 +1,9 @@
+collector=chalkbox.collectors.BlackboardCollector
+processor=chalkbox.python.CSSE1001Test
+output=chalkbox.output.SaveJsonOutput
+
+gradebook=./src/test/resources/csse1001/gradebook.zip
+json=./src/test/resources/csse1001/data
+
+runner=./src/test/resources/csse1001/assignment/test_a2.py
+included=./src/test/resources/csse1001/assignment

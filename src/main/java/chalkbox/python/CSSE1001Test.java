@@ -27,7 +27,7 @@ public class CSSE1001Test {
     @ConfigItem(key = "included", description = "Path to supplied assignment files")
     public String included;
 
-    @Pipe(stream = "submissions")
+    @Pipe
     public Collection run(Collection collection) {
         Data feedback = collection.getResults();
         ProcessExecution process;
@@ -47,6 +47,8 @@ public class CSSE1001Test {
             process = Execution.runProcess(working, environment, 10000,
                     PYTHON, runner, "--json");
         } catch (IOException e) {
+            System.err.println("Error occurred trying to spawn the test runner process (in json mode)");
+            e.printStackTrace();
             feedback.set("test.error", "IOException occurred");
             return collection;
         } catch (TimeoutException e) {
@@ -63,6 +65,8 @@ public class CSSE1001Test {
             process = Execution.runProcess(working, environment, 10000,
                     PYTHON, runner);
         } catch (IOException e) {
+            System.err.println("Error occurred trying to spawn the test runner process (in json mode)");
+            e.printStackTrace();
             feedback.set("test.error", "IOException occurred");
             return collection;
         } catch (TimeoutException e) {
