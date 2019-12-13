@@ -9,15 +9,16 @@ import chalkbox.api.annotations.Output;
 import chalkbox.api.annotations.Pipe;
 import chalkbox.api.annotations.Prior;
 import chalkbox.api.annotations.Processor;
+import chalkbox.api.config.ChalkboxConfig;
+import chalkbox.api.config.ConfigParseException;
+import chalkbox.api.config.ConfigParser;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,55 +33,31 @@ public class ChalkBox {
     private Class collector;
     private Class processor;
     private Class output;
-    private Map<String, String> config = new HashMap<>();
+    private ChalkboxConfig config;
     private boolean hasError;
 
     private PrintStream outputStream = System.out;
 
     /**
      * Constructor a new ChalkBox instance without loading any configuration.
-     */
-    public ChalkBox() {
-
-    }
-
-    /**
-     * Add the given configuration to the ChalkBox configuration.
      *
-     * @param config A configuration of chalkbox.
+     * This should only be
      */
-    public void loadConfig(Map<String, String> config) {
-        this.config.putAll(config);
-    }
+    private ChalkBox() {
 
-    /**
-     * Set the output stream of running the chalkbox to the given print stream.
-     *
-     * @param stream Stream to output run output to.
-     */
-    public void setOutput(PrintStream stream) {
-        outputStream = stream;
     }
-
 
     /**
      * Construct a new ChalkBox instance based on the configuration file.
      *
-     * @param configuration Path to a chalkbox configuration file.
+     * @param configuration Chalkbox configuration settings.
      */
-    public ChalkBox(String configuration) {
-        /* Attempt to read the configuration file */
-        try {
-            loadConfig(configuration);
-        } catch (IOException e) {
-            System.err.println("Unable to read config file: " + configuration);
-            hasError = true;
-            return;
-        }
+    public ChalkBox(ChalkboxConfig configuration) {
+        this.config = configuration;
 
         /* Ensure that all the required classes are defined */
         for (String clazz : new String[]{"collector", "processor", "output"}) {
-            if (!config.containsKey(clazz)) {
+            if (!config.isSet(clazz)) {
                 System.err.println("Configuration has no " + clazz + " class");
                 hasError = true;
                 return;
@@ -94,6 +71,15 @@ public class ChalkBox {
         validateConfigItems(collector);
         validateConfigItems(processor);
         validateConfigItems(output);
+    }
+
+    /**
+     * Set the output stream of running the chalkbox to the given print stream.
+     *
+     * @param stream Stream to output run output to.
+     */
+    public void setOutput(PrintStream stream) {
+        outputStream = stream;
     }
 
     /**
@@ -127,7 +113,7 @@ public class ChalkBox {
             }
 
             /* Print an error if the key is missing */
-            if (!config.containsKey(key)) {
+            if (!config.isSet(key)) {
                 System.err.println("Config file missing value for "
                         + key + " required by " + clazz.getName());
                 System.err.println(key + ": " + annotation.description());
@@ -151,10 +137,10 @@ public class ChalkBox {
      */
     private Class loadClass(String classConfig) {
         try {
-            return Class.forName(config.get(classConfig));
+            return Class.forName(config.value(classConfig));
         } catch (ClassNotFoundException cnf) {
             System.err.println("Unable to find " + classConfig + " class: "
-                    + config.get(classConfig));
+                    + config.value(classConfig));
             return null;
         }
     }
@@ -195,28 +181,11 @@ public class ChalkBox {
         return fields;
     }
 
-    private void loadConfig(String path) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-        String line = reader.readLine();
-        while (line != null) {
-            if (line.startsWith("#")) {
-                line = reader.readLine();
-                continue;
-            }
-            String[] parts = line.split("=", 2);
-            if (parts.length == 2) {
-                config.put(parts[0], parts[1]);
-            }
-            line = reader.readLine();
-        }
-        reader.close();
-    }
-
     private void runPriors(Class<?> clazz, Object instance) {
         for (Method prior : methodsByAnnotation(clazz, Prior.class)) {
             try {
                 if (prior.getParameterCount() > 0) {
-                    prior.invoke(instance, config);
+                    prior.invoke(instance, config.toMap());
                 } else {
                     prior.invoke(instance);
                 }
@@ -254,8 +223,8 @@ public class ChalkBox {
             }
 
             try {
-                if (config.containsKey(key)) {
-                    field.set(instance, config.get(key));
+                if (config.isSet(key)) {
+                    field.set(instance, config.value(key));
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -310,7 +279,7 @@ public class ChalkBox {
                 System.setOut(outputStream);
                 PrintStream oldErr = System.err;
                 System.setErr(outputStream);
-                Object result = collector.invoke(instance, config);
+                Object result = collector.invoke(instance, config.toMap());
                 System.setOut(oldOut);
                 System.setErr(oldErr);
                 if (!(result instanceof List)) {
@@ -431,7 +400,7 @@ public class ChalkBox {
         return builder.toString();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ConfigParseException {
         if (args.length == 2) {
             if (!args[0].equals("help")) {
                 System.err.println(USAGE);
@@ -447,7 +416,8 @@ public class ChalkBox {
             return;
         }
 
-        ChalkBox box = new ChalkBox(args[0]);
+        ChalkboxConfig config = ConfigParser.box().read(Paths.get(args[0]));
+        ChalkBox box = new ChalkBox(config);
         box.run();
     }
 }

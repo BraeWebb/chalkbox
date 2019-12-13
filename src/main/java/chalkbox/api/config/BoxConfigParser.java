@@ -17,9 +17,9 @@ import java.util.Map;
  *
  * Example format:
  * <pre>
-*  key1=value1
-*  key2=value2
-*  key3=value3
+ * key1=value1
+ * key2=value2
+ * key3=value3
  * </pre>
  */
 class BoxConfigParser implements ConfigParser {
@@ -53,7 +53,7 @@ class BoxConfigParser implements ConfigParser {
             }
 
             // Skip comments
-            if (line.startsWith("#")) {
+            if (line.startsWith("#") || line.length() == 0) {
                 continue;
             }
 
