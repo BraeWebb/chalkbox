@@ -21,7 +21,7 @@ public interface FieldAssigner {
      * @return a concrete implementation of the {@code FieldAssigner}.
      */
     static FieldAssigner getInstance(Object instance) {
-        return null;
+        return new FieldAssignerImpl(instance);
     }
 
     /**
