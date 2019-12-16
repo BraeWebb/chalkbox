@@ -12,6 +12,7 @@ import chalkbox.api.annotations.Processor;
 import chalkbox.api.config.ChalkboxConfig;
 import chalkbox.api.config.ConfigParseException;
 import chalkbox.api.config.ConfigParser;
+import chalkbox.api.config.FieldAssigner;
 
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
@@ -214,6 +215,8 @@ public class ChalkBox {
     }
 
     private void assignConfigItems(Class<?> clazz, Object instance) {
+        FieldAssigner assigner = FieldAssigner.getInstance(instance);
+
         for (Field field : fieldsByAnnotation(clazz, ConfigItem.class)) {
             ConfigItem annotation = field.getAnnotation(ConfigItem.class);
 
@@ -222,12 +225,26 @@ public class ChalkBox {
                 key = field.getName();
             }
 
+            if (!config.isSet(key)) {
+                continue;
+            }
+
+            Method assign = FieldAssigner.getMethod(assigner, field);
+            if (assign == null) {
+                System.err.println("Unable to find assign method for config item type of " + field.getType());
+                continue;
+            }
+
+            boolean result;
             try {
-                if (config.isSet(key)) {
-                    field.set(instance, config.value(key));
-                }
-            } catch (IllegalAccessException e) {
+                result = (boolean) assign.invoke(assigner, field.get(instance), field, config.value(key));
+            } catch (Exception e) {
                 e.printStackTrace();
+                hasError = true;
+                return;
+            }
+
+            if (!result) {
                 hasError = true;
             }
         }
