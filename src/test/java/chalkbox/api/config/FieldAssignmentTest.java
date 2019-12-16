@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -37,6 +38,7 @@ public class FieldAssignmentTest {
         public boolean booleanField;
         public List<String> listField;
         public String[] arrayField;
+        public ZipFile zipField;
     }
 
     public interface Callback {
@@ -102,7 +104,7 @@ public class FieldAssignmentTest {
 
     @Test
     public void testFileAssignment() {
-        String file = "src/test/java/chalkbox/api/config/FieldAssignmentTest.java";
+        String file = "src/test/resources/csse1001/test.box";
         boolean result = assign("fileField", file);
 
         assertTrue(result);
@@ -167,18 +169,23 @@ public class FieldAssignmentTest {
         boolean result = assign("booleanField", "true");
 
         assertTrue(result);
-        assertEquals(true, instance.booleanField);
+        assertTrue(instance.booleanField);
+
+        result = assign("booleanField", "false");
+
+        assertTrue(result);
+        assertFalse(instance.booleanField);
     }
 
     @Test
-    public void testNoBoolAssignment() {
+    public void testInvalidBoolAssignment() {
         String out = mockErrorStream(() -> {
             boolean result = assign("booleanField", "not a bool");
             assertFalse(result);
         });
 
         assertEquals("Unable to cast not a bool to boolean\n", out);
-        assertEquals(false, instance.booleanField);
+        assertFalse(instance.booleanField);
     }
 
     @Test
@@ -229,5 +236,38 @@ public class FieldAssignmentTest {
 
         assertTrue(result);
         assertArrayEquals(list.toArray(new String[]{}), instance.arrayField);
+    }
+
+    @Test
+    public void testZipAssignment() {
+        String file = "src/test/resources/csse1001/gradebook.zip";
+        boolean result = assign("zipField", file);
+
+        assertTrue(result);
+        assertEquals(file, instance.zipField.getName());
+    }
+
+    @Test
+    public void testNoZipAssignment() {
+        String file = "src/test/resources/csse1001/nozip.zip";
+        String out = mockErrorStream(() -> {
+            boolean result = assign("zipField", file);
+            assertFalse(result);
+        });
+
+        assertTrue(out.endsWith("IO Exception trying to read zip file\n"));
+        assertNull(instance.zipField);
+    }
+
+    @Test
+    public void testInvalidZipAssignment() {
+        String file = "src/test/resources/csse1001/test.box";
+        String out = mockErrorStream(() -> {
+            boolean result = assign("zipField", file);
+            assertFalse(result);
+        });
+
+        assertTrue(out.endsWith("Invalid zip file found\n"));
+        assertNull(instance.zipField);
     }
 }

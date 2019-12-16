@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 /**
  * Interface to share common functionality of config fields assignment.
@@ -55,4 +56,5 @@ public interface FieldAssigner {
     boolean assign(boolean type, Field field, String value);
     boolean assign(List<?> type, Field field, String value);
     boolean assign(Object[] type, Field field, String value);
+    boolean assign(ZipFile type, Field field, String value);
 }

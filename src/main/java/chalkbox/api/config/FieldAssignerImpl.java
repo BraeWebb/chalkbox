@@ -1,10 +1,13 @@
 package chalkbox.api.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 /**
  * Default implementation of the field assigner interface.
@@ -107,5 +110,19 @@ public class FieldAssignerImpl implements FieldAssigner {
     @Override
     public boolean assign(Object[] type, Field field, String value) {
         return assign(field, value.split(","));
+    }
+
+    @Override
+    public boolean assign(ZipFile type, Field field, String value) {
+        try (ZipFile zipFile = new ZipFile(Paths.get(value).toFile())) {
+            return assign(field, zipFile);
+        } catch (ZipException e) {
+            e.printStackTrace();
+            System.err.println("Invalid zip file found");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("IO Exception trying to read zip file");
+        }
+        return false;
     }
 }
