@@ -25,7 +25,7 @@ import java.util.zip.ZipFile;
 @Collector
 public class BlackboardCollector extends LoadSubmissionData {
     @ConfigItem(key = "gradebook", description = "Location of the blackboard gradebook")
-    public String gradebook;
+    public File gradebook;
 
     @DataSet
     public List<Collection> collect(Map<String, String> config) throws IOException {

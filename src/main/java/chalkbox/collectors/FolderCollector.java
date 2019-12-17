@@ -15,16 +15,13 @@ import java.util.Map;
 @Collector
 public class FolderCollector extends LoadSubmissionData {
     @ConfigItem(key = "root", description = "Root directory of folder submissions")
-    public String folderPath;
+    public File folder;
 
-    private File folder;
     private boolean parseError = false;
 
     @Prior
     public void loadFolder(Map<String, String> config) {
-        this.folder = new File(folderPath);
-
-        if (!this.folder.exists() || !this.folder.isDirectory()) {
+        if (!this.folder.isDirectory()) {
             parseError = true;
             System.err.println("Folder parameter does not exist or is not a folder");
         }

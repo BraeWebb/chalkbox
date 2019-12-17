@@ -66,7 +66,7 @@ public class Style {
     /** Root directory of style files. Directory should include .style files in top level */
     @ConfigItem(key = "style",
                 description = "Root directory of style files. Top level should have only .style files")
-    public String styleRoot;
+    public File styleRoot;
 
     /**
      * Read a style file into the JSON format described in the {@link Style}
@@ -80,7 +80,7 @@ public class Style {
     @Pipe(stream = "submissions")
     public Collection readStyle(Collection collection) {
         Data data = collection.getResults();
-        String stylePath = styleRoot + File.separator + data.get("sid") + ".style";
+        String stylePath = styleRoot.getPath() + File.separator + data.get("sid") + ".style";
 
         String style;
         try {

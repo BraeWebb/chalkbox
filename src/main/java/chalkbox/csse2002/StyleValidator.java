@@ -42,20 +42,11 @@ public class StyleValidator {
     /** Root directory of style files. Directory should include .style files in top level */
     @ConfigItem(key = "style",
                 description = "Root directory of style files. Top level should have only .style files")
-    public String styleRoot;
+    public File styleRoot;
 
     /** The expected categories separated by a pipe (|) */
-    @ConfigItem(description = "The expected style categories separated by a pipe (|)")
-    public String styleCategories;
-
-    /** All the expected style categories in the style file */
-    private String[] categories;
-
-    /** Split the style categories based on the pipe symbol */
-    @Prior
-    public void separateCategories(Map<String, String> config) {
-        categories = styleCategories.toLowerCase().split("\\|");
-    }
+    @ConfigItem(description = "The expected style categories separated by a comma")
+    public String[] categories;
 
     /**
      * Read a style file into the JSON format described in the {@link Style}
@@ -66,7 +57,7 @@ public class StyleValidator {
      * @param collection A submission to read.
      * @return The submission.
      */
-    @Pipe(stream = "submissions")
+    @Pipe
     public Collection validate(Collection collection) {
         String sid = (String) collection.getResults().get("sid");
         String stylePath = styleRoot + File.separator + sid + ".style";
