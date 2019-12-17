@@ -27,6 +27,10 @@ public class IndividualJavaTest extends JavaTest {
     @ConfigItem(key = "temp", description = "A temporary output directory")
     public String tempResults;
 
+    @ConfigItem(key = "included", required = false,
+            description = "Folder containing files to include in submission working directory when running tests")
+    public File included = null;
+
     private Map<String, String> classPaths = new HashMap<>();
 
     private Bundle tests;
@@ -50,7 +54,9 @@ public class IndividualJavaTest extends JavaTest {
         }
 
         try {
-            submission.getWorking().copyFolder(new File("."));
+            if (included != null) {
+                submission.getWorking().copyFolder(included);
+            }
         } catch (IOException e) {
             submission.getResults().set("tests.error.errors",
                     "Unable to populate working directory");

@@ -22,21 +22,21 @@ public class CSSE1001Test {
     public String PYTHON = "python3";
 
     @ConfigItem(key = "runner", description = "Name of the test runner")
-    public String runner;
+    public File runner;
 
     @ConfigItem(key = "included", description = "Path to supplied assignment files")
-    public String included;
+    public File included;
 
     @Pipe
     public Collection run(Collection collection) {
         Data feedback = collection.getResults();
         ProcessExecution process;
         Map<String, String> environment = new HashMap<>();
-        environment.put("PYTHONPATH", included);
+        environment.put("PYTHONPATH", included.getPath());
         File working = new File(collection.getWorking().getUnmaskedPath());
 
         try {
-            collection.getWorking().copyFolder(new File(included));
+            collection.getWorking().copyFolder(included);
             collection.getWorking().copyFolder(new File(collection.getSource().getUnmaskedPath()));
         } catch (IOException e) {
             feedback.set("test.error", "Unable to copy supplied directory");
@@ -45,7 +45,7 @@ public class CSSE1001Test {
 
         try {
             process = Execution.runProcess(working, environment, 10000,
-                    PYTHON, runner, "--json");
+                    PYTHON, runner.getPath(), "--json");
         } catch (IOException e) {
             System.err.println("Error occurred trying to spawn the test runner process (in json mode)");
             e.printStackTrace();
@@ -63,7 +63,7 @@ public class CSSE1001Test {
 
         try {
             process = Execution.runProcess(working, environment, 10000,
-                    PYTHON, runner);
+                    PYTHON, runner.getPath());
         } catch (IOException e) {
             System.err.println("Error occurred trying to spawn the test runner process");
             e.printStackTrace();
