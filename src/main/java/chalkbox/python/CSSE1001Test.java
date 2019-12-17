@@ -39,6 +39,7 @@ public class CSSE1001Test {
             collection.getWorking().copyFolder(included);
             collection.getWorking().copyFolder(new File(collection.getSource().getUnmaskedPath()));
         } catch (IOException e) {
+            e.printStackTrace();
             feedback.set("test.error", "Unable to copy supplied directory");
             return collection;
         }
