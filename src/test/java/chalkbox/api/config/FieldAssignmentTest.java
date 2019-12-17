@@ -104,7 +104,8 @@ public class FieldAssignmentTest {
 
     @Test
     public void testFileAssignment() {
-        String file = "src/test/resources/csse1001/test.box";
+        String file = "src" + File.separator + "test" + File.separator + "resources"
+                      + File.separator + "csse1001" + File.separator + "test.box";
         boolean result = assign("fileField", file);
 
         assertTrue(result);
@@ -240,7 +241,8 @@ public class FieldAssignmentTest {
 
     @Test
     public void testZipAssignment() {
-        String file = "src/test/resources/csse1001/gradebook.zip";
+        String file = "src" + File.separator + "test" + File.separator + "resources"
+                + File.separator + "csse1001" + File.separator + "test.box";
         boolean result = assign("zipField", file);
 
         assertTrue(result);
@@ -249,7 +251,8 @@ public class FieldAssignmentTest {
 
     @Test
     public void testNoZipAssignment() {
-        String file = "src/test/resources/csse1001/nozip.zip";
+        String file = "src" + File.separator + "test" + File.separator + "resources"
+                + File.separator + "csse1001" + File.separator + "nozip.zip";
         String out = mockErrorStream(() -> {
             boolean result = assign("zipField", file);
             assertFalse(result);
@@ -261,7 +264,8 @@ public class FieldAssignmentTest {
 
     @Test
     public void testInvalidZipAssignment() {
-        String file = "src/test/resources/csse1001/test.box";
+        String file = "src" + File.separator + "test" + File.separator + "resources"
+                + File.separator + "csse1001" + File.separator + "test.box";
         String out = mockErrorStream(() -> {
             boolean result = assign("zipField", file);
             assertFalse(result);
