@@ -13,9 +13,9 @@ import java.util.concurrent.TimeoutException;
 @Processor
 public class PythonUnitTest {
 
-    @Pipe(stream = "submissions")
+    @Pipe
     public Collection run(Collection collection) {
-        File working = new File(collection.getSource().getUnmaskedPath(""));
+        File working = new File(collection.getSource().getUnmaskedPath());
         String output = collection.getWorking().getUnmaskedPath("results.json");
 
         try {

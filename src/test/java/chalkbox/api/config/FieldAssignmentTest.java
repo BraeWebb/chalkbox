@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipFile;
@@ -104,8 +105,7 @@ public class FieldAssignmentTest {
 
     @Test
     public void testFileAssignment() {
-        String file = "src" + File.separator + "test" + File.separator + "resources"
-                      + File.separator + "csse1001" + File.separator + "test.box";
+        String file = Paths.get("src/test/resources/csse1001/test.box").toString();
         boolean result = assign("fileField", file);
 
         assertTrue(result);
@@ -121,7 +121,7 @@ public class FieldAssignmentTest {
             assertFalse(result);
         });
 
-        assertEquals("Unable to find file: nosuchfile\n", out);
+        assertEquals("Unable to find file: nosuchfile" + System.lineSeparator(), out);
         assertNull(instance.fileField);
     }
 
@@ -140,9 +140,14 @@ public class FieldAssignmentTest {
             assertFalse(result);
         });
 
-        assertEquals("Invalid enum value for enum: class chalkbox.api.config.FieldAssignmentTest$TestEnum\n" +
-                "Value enum values are: [IN_ENUM, A, B, C]\n" +
-                "Found: NOT_IN_ENUM\n", out);
+        assertEquals(
+                "Invalid enum value for enum: class chalkbox.api.config.FieldAssignmentTest$TestEnum"
+                        + System.lineSeparator() +
+                        "Value enum values are: [IN_ENUM, A, B, C]"
+                        + System.lineSeparator() +
+                        "Found: NOT_IN_ENUM"
+                        + System.lineSeparator(),
+                out);
         assertNull(instance.enumField);
     }
 
@@ -161,7 +166,7 @@ public class FieldAssignmentTest {
             assertFalse(result);
         });
 
-        assertEquals("Unable to cast not an int to integer\n", out);
+        assertEquals("Unable to cast not an int to integer" + System.lineSeparator(), out);
         assertEquals(0, instance.intField);
     }
 
@@ -185,7 +190,7 @@ public class FieldAssignmentTest {
             assertFalse(result);
         });
 
-        assertEquals("Unable to cast not a bool to boolean\n", out);
+        assertEquals("Unable to cast not a bool to boolean" + System.lineSeparator(), out);
         assertFalse(instance.booleanField);
     }
 
@@ -241,8 +246,7 @@ public class FieldAssignmentTest {
 
     @Test
     public void testZipAssignment() {
-        String file = "src" + File.separator + "test" + File.separator + "resources"
-                + File.separator + "csse1001" + File.separator + "test.box";
+        String file = Paths.get("src/test/resources/csse1001/gradebook.zip").toString();
         boolean result = assign("zipField", file);
 
         assertTrue(result);
@@ -251,27 +255,25 @@ public class FieldAssignmentTest {
 
     @Test
     public void testNoZipAssignment() {
-        String file = "src" + File.separator + "test" + File.separator + "resources"
-                + File.separator + "csse1001" + File.separator + "nozip.zip";
+        String file = Paths.get("src/test/resources/csse1001/nozip.zip").toString();
         String out = mockErrorStream(() -> {
             boolean result = assign("zipField", file);
             assertFalse(result);
         });
 
-        assertTrue(out.endsWith("IO Exception trying to read zip file\n"));
+        assertTrue(out.endsWith("IO Exception trying to read zip file" + System.lineSeparator()));
         assertNull(instance.zipField);
     }
 
     @Test
     public void testInvalidZipAssignment() {
-        String file = "src" + File.separator + "test" + File.separator + "resources"
-                + File.separator + "csse1001" + File.separator + "test.box";
+        String file = Paths.get("src/test/resources/csse1001/test.box").toString();
         String out = mockErrorStream(() -> {
             boolean result = assign("zipField", file);
             assertFalse(result);
         });
 
-        assertTrue(out.endsWith("Invalid zip file found\n"));
+        assertTrue(out.endsWith("Invalid zip file found" + System.lineSeparator()));
         assertNull(instance.zipField);
     }
 }

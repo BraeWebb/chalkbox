@@ -10,6 +10,7 @@ import chalkbox.api.common.ProcessExecution;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -21,14 +22,14 @@ public class Splat {
     public String PYTHON = "python3";
 
     @ConfigItem(key = "splat", description = "Path to splat executable")
-    public String splat;
+    public File splat;
 
-    @Pipe(stream = "submissions")
+    @Pipe
     public Collection run(Collection collection) {
         Data feedback = collection.getResults();
         Map<String, String> environment = new HashMap<>();
-        environment.put("PYTHONPATH", splat);
-        File working = new File(splat + File.separator + "splat_analysis");
+        environment.put("PYTHONPATH", splat.getPath());
+        File working = Paths.get(splat.getPath() + "/splat_analysis").toFile();
 
         ProcessExecution process;
         try {

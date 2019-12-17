@@ -10,10 +10,10 @@ import chalkbox.api.collections.Data;
 import chalkbox.api.common.java.JUnitRunner;
 import chalkbox.api.files.FileLoader;
 import chalkbox.java.compilation.IndividualJavaCompiler;
-import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +24,9 @@ import java.util.Map;
  */
 @Processor(depends = {IndividualJavaCompiler.class})
 public class IndividualJavaTest extends JavaTest {
-    @ConfigItem(key = "temp", description = "A temporary output directory")
-    public String tempResults;
+    @ConfigItem(key = "included", required = false,
+            description = "Folder containing files to include in submission working directory when running tests")
+    public File included = null;
 
     private Map<String, String> classPaths = new HashMap<>();
 
@@ -33,8 +34,18 @@ public class IndividualJavaTest extends JavaTest {
 
     @Prior
     public void buildClassPath(Map<String, String> config) {
-        File solutionFolder = new File(tempResults + File.separator + "solution");
+        /* Create a new temporary directory for compilation output */
+        Bundle compilationOutput;
+        Bundle solutionBundle;
+        try {
+            compilationOutput = new Bundle();
+            solutionBundle = compilationOutput.makeBundle("solution");
+        } catch (IOException e) {
+            System.err.println("Unable to create compilation output directory");
+            return;
+        }
 
+        File solutionFolder = Paths.get(solutionBundle.getUnmaskedPath()).toFile();
         File[] classes = solutionFolder.listFiles();
         for (File clazz : classes) {
             classPaths.put(FileLoader.truncatePath(solutionFolder, clazz), clazz.getPath());
@@ -50,7 +61,9 @@ public class IndividualJavaTest extends JavaTest {
         }
 
         try {
-            submission.getWorking().copyFolder(new File("."));
+            if (included != null) {
+                submission.getWorking().copyFolder(included);
+            }
         } catch (IOException e) {
             submission.getResults().set("tests.error.errors",
                     "Unable to populate working directory");
