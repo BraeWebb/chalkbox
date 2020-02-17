@@ -141,7 +141,7 @@ public class JUnit {
         compileSolution(solutionSource, "sample solution",
                 solutionOutput.getUnmaskedPath(), writer);
 
-        solutionClassPath = classPath + ":" + solutionsOutput.getUnmaskedPath();
+        solutionClassPath = classPath + ":" + solutionOutput.getUnmaskedPath();
     }
 
     @Pipe

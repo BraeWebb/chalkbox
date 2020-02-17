@@ -123,6 +123,7 @@ public class IndividualJavaCompiler {
             /* Delete the file associated with the current class */
             String targetFile = folder + File.separator + output.getPathName(className);
             output.deleteFile(targetFile.replace(".java", ".class"));
+            output.deleteFile(targetFile.replace(".java", "$1.class"));
 
             /* Map the class to it's associated classpath */
             classPaths.put(className, classPath + ":" + output.getUnmaskedPath(folder));
