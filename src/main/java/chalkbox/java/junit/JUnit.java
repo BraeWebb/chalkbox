@@ -148,33 +148,32 @@ public class JUnit {
     public Collection compileTests(Collection submission) {
         String[] testClasses = classes.split("\\|");
         String student = submission.getResults().get("sid").toString();
-        LOGGER.finest("Compiling student tests " + student);
-        LOGGER.finest(Arrays.toString(testClasses));
+        LOGGER.info(String.format("STUDENT(%s) Tests Compiling", student));
 
         Bundle tests = submission.getSource().getBundle("test");
+
+        StringWriter output = new StringWriter();
+        StringWriter error = new StringWriter();
 
         List<SourceFile> files = new ArrayList<>();
         for (String className : testClasses) {
             String fileName = className.replace(".", "/") + ".java";
             try {
                 files.add(tests.getFile(fileName));
+                output.write("JUnit test file " + fileName + " found\n");
             } catch (FileNotFoundException e) {
-                submission.getResults().set("junit.compiles", false);
-                submission.getResults().set("junit.error", "JUnit test file " + fileName + " not found");
-                LOGGER.finer("Unable to find a test file (" + fileName + ") for " + student);
+                error.write("JUnit test file " + fileName + " not found\n");
             } catch (IOException e) {
-                submission.getResults().set("junit.compiles", false);
-                submission.getResults().set("junit.error", "IO Compile Error - See tutor");
-                LOGGER.warning("IOException when trying to get " + fileName + " for " + student);
+                error.write("IO Compile Error - Please contact course staff\n");
             }
         }
 
-        StringWriter output = new StringWriter();
         boolean success = Compiler.compile(files, solutionClassPath,
                 submission.getWorking().getUnmaskedPath(), output);
 
         submission.getResults().set("junit.compiles", success);
         submission.getResults().set("junit.output", output.toString());
+        submission.getResults().set("junit.error", error.toString());
         return submission;
     }
 
