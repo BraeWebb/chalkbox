@@ -112,6 +112,11 @@ public class Conformance {
         }
 
         for (String className : expectedClasses.keySet()) {
+            // Skip anon generated classes
+            if (className.contains("$")) {
+                continue;
+            }
+
             String jsonKey = "conformance." + className.replace(".", "\\.") + ".";
             Class expectedClass = expectedClasses.get(className);
             Class actualClass = submissionMap.get(className);
