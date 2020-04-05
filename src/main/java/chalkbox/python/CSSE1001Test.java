@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 //todo(issue:#21) Refactor this to not be CSSE1001
-@Processor
+@Processor(depends = RenameSubmissions.class)
 public class CSSE1001Test {
     @ConfigItem(key = "python", required = false,
             description = "Command to execute python from terminal")
@@ -37,7 +37,6 @@ public class CSSE1001Test {
 
         try {
             collection.getWorking().copyFolder(included);
-            collection.getWorking().copyFolder(new File(collection.getSource().getUnmaskedPath()));
         } catch (IOException e) {
             e.printStackTrace();
             feedback.set("test.error", "Unable to copy supplied directory");
@@ -46,7 +45,7 @@ public class CSSE1001Test {
 
         try {
             process = Execution.runProcess(working, environment, 10000,
-                    PYTHON, runner.getPath(), "--json");
+                    PYTHON, runner.getAbsolutePath(), "--json");
         } catch (IOException e) {
             System.err.println("Error occurred trying to spawn the test runner process (in json mode)");
             e.printStackTrace();
