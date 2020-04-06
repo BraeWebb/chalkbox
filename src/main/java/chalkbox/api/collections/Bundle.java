@@ -314,10 +314,6 @@ public class Bundle {
 
     @Override
     public String toString() {
-        try {
-            return hash() + ": " + files.toString();
-        } catch (IOException e) {
-            return files.toString();
-        }
+        return folder.toString() + ": " + files.toString();
     }
 }

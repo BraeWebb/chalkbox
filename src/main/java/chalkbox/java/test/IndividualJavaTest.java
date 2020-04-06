@@ -76,12 +76,16 @@ public class IndividualJavaTest extends JavaTest {
             String rootJSON = "tests." + className
                     .replace(".", "\\.");
 
+
             if (!submission.getResults().is("compilation."
                     + clazz.replace(".", "\\.") + ".compiles")) {
                 submission.getResults().set(rootJSON + ".errors",
-                        "Class could not compile - tests not run");
+                        "src class could not compile - tests for this class not run.");
                 continue;
             }
+
+
+
 
             String classPath = this.classPath + ":" + classPaths.get(clazz)
                     + ":" + submission.getWorking().getUnmaskedPath(clazz);

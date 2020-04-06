@@ -100,11 +100,13 @@ public class LoadSubmissionData {
                 return initial;
             }
         } else {
+            initial.set("sid", sid);
+            initial.set("json", file.getPath());
             return initial;
         }
 
-        data.set("sid", sid);
-        data.set("json", file.getPath());
+        //data.set("sid", sid);
+        //data.set("json", file.getPath());
 
         return data;
     }
