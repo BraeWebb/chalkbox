@@ -26,7 +26,7 @@ public class SaveJsonOutput {
             } else {
                 jsonFile = new File(json + File.separator + results.get("sid") + ".json");
             }
-            System.out.println(results);
+
             try {
                 Files.write(jsonFile.toPath(), results.toString().getBytes());
             } catch (IOException e) {
