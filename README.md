@@ -1,7 +1,7 @@
 # Chalkbox v2 ( WIP )
 
-<img src="" align="right"
-     alt="Logo here" width="120" height="178">
+<img src="https://github.com/BraeWebb/chalkbox/raw/master/resources/chalkbox.png" align="right" alt="Chalkbox Logo">
+
 
 Chalkbox is a programming courses dream tool which allows the collection and 
 running of multiple assignments in multiple languages.
@@ -43,4 +43,6 @@ https://docs.braewebb.com/guides/chalkbox.pdf
 
 Coming Soon
 
+## Copyright
 
+Chalkbox is copyright of Brae Webb and Emily Bennet. The Chalkbox logo is copyright Anna Truffet
