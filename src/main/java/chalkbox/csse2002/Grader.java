@@ -42,7 +42,7 @@ public class Grader {
       * don't know what the total possible tests are so we can't
       * calculate the total amount of tests */
     /** Total amount of possible passing tests */
-    private static float TOTAL_TESTS = 77f;
+    private static float TOTAL_TESTS = 85f;
 
     /**
      * Grade a submission.
@@ -65,7 +65,7 @@ public class Grader {
                         + test.replace(".", "\\.") + ".passes").toString());
             }
         }
-        float testMarks = (passingTests / TOTAL_TESTS) * 55;
+        float testMarks = (passingTests / TOTAL_TESTS) * 50;
         data.set("grades.tests.passing", passingTests);
         data.set("grades.tests.percent", passingTests / TOTAL_TESTS);
         data.set("grades.tests.rawGrade", testMarks);
@@ -116,7 +116,7 @@ public class Grader {
             totalPossible += 1;
         }
 
-        float junitMarks = totalPossible != 0 ? (junitGrade / totalPossible) * 20 : 0;
+        float junitMarks = totalPossible != 0 ? (junitGrade / totalPossible) * 15 : 0;
 
         data.set("grades.junit.possible", totalPossible);
         data.set("grades.junit.total", junitGrade);

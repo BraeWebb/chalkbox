@@ -48,10 +48,16 @@ public class JUnit {
             description = "Path to a directory containing various broken sample solutions")
     public String solutions;
 
+    @Prior
+    public void init() {
+        createCompilationOutput();
+        compileSolution();
+        compileSolutions();
+    }
+
     /**
      * Creates the compilation output directory.
      */
-    @Prior
     public void createCompilationOutput() {
         /* Create a new temporary directory for compilation output */
         Bundle compilationOutput;
@@ -103,7 +109,6 @@ public class JUnit {
     /**
      * Compile all the broken solutions to test students junit tests on
      */
-    @Prior
     public void compileSolutions() {
         /* Collect the list of broken solution folders */
         File solutionsFolder = new File(solutions);
@@ -132,7 +137,6 @@ public class JUnit {
     /**
      * Compile the sample solution.
      */
-    @Prior
     public void compileSolution() {
         Bundle solutionSource = new Bundle(new File(solution));
 

@@ -29,7 +29,7 @@ public class LoadSubmissionData {
      * Repeatedly warn and ask the user if they want to continue.
      */
     //todo(issue:#18): this needs to be able to be disabled in a 'non-interactive' mode
-    private void promptWarning() {
+    private void promptWarning() {/*
         Scanner input = new Scanner(System.in);
         System.out.print(WARNING);
 
@@ -40,7 +40,7 @@ public class LoadSubmissionData {
             if (answer.equals("n")) {
                 System.exit(1);
             }
-        } while (!answer.equals("y"));
+        } while (!answer.equals("y"));*/
     }
 
     /**
@@ -94,7 +94,7 @@ public class LoadSubmissionData {
         if (file.exists()) {
             try {
                 data = new Data(new String(Files.readAllBytes(file.toPath())));
-                System.out.println("WARNING: Data file for " + sid + " loaded and likely to be overridden");
+                //System.out.println("WARNING: Data file for " + sid + " loaded and likely to be overridden");
             } catch (IOException e) {
                 System.err.println("Couldn't read data file: " + file);
                 return initial;
