@@ -28,7 +28,7 @@ import picocli.CommandLine.Parameters;
         footer = {
                 "",
                 "",
-                "Chalkbox is a MIT licensed project built originally by UQ Students.",
+                "Chalkbox is a MIT licensed project built originally by UQ Students -> UQ Academics.",
                 ""
             })
 public class Chalkbox implements Runnable {
