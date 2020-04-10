@@ -1,6 +1,0 @@
-collector=chalkbox.collectors.FolderCollector
-processor=chalkbox.csse2002.Grader
-output=chalkbox.output.SaveJsonOutput
-
-root=/Users/brae/projects/csse2002/marker/environments/ass1/submissions
-json=/Users/brae/drive/csse2002/2019s1/marking/ass1

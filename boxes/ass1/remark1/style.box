@@ -1,9 +1,0 @@
-collector=chalkbox.collectors.FolderCollector
-processor=chalkbox.csse2002.Style
-output=chalkbox.output.SaveJsonOutput
-
-root=/Users/brae/drive/csse2002/2019s1/ass1/remark1/submissions
-json=/Users/brae/drive/csse2002/2019s1/marking/ass1remark1
-
-style=/Users/brae/drive/csse2002/2019s1/ass1/remark1/style
-styleCategories=Naming|Structure and layout|Good OO|Commenting
