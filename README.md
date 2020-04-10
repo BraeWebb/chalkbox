@@ -6,7 +6,7 @@
 Chalkbox is a programming courses dream tool which allows the collection and 
 running of multiple assignments in multiple languages.
 
-Brief Feature List:
+**Brief Feature List**
 
 * None, we suck
 
