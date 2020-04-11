@@ -1,7 +1,7 @@
 package chalkbox2.commands.java;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import chalkbox2.api.Loggable;
+import chalkbox2.components.java.ConformanceComponent;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -17,8 +17,7 @@ import picocli.CommandLine.Option;
         optionListHeading = "%nOptions:%n",
         mixinStandardHelpOptions = true
 )
-public class Conformance implements Runnable {
-    private static final Logger logger = LogManager.getLogger(Conformance.class.getName());
+public class Conformance implements Runnable, Loggable {
 
     @Option(names = "--silent", description = "Silences formatting.")
     boolean silent;
@@ -47,7 +46,9 @@ public class Conformance implements Runnable {
     @Override
     public void run() {
         header();
-        logger.info("Starting conformance checking.");
+        logger().info("Starting conformance checking.");
+
+        ConformanceComponent conformancer = new ConformanceComponent();
     }
 
 
