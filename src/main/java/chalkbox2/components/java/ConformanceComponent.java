@@ -38,11 +38,12 @@ public class ConformanceComponent extends ComponentImpl {
         logger().error("Help im a security hole");
     }
 
-    public void init() {
-
+    public void init() throws Exception {
+        //loadStructure();
+        //loadExpected();
     }
 
-    public void run() {
+    public void run(String... args) {
         // runs a single assignment given the source directory of the submission
 
     }
@@ -50,8 +51,7 @@ public class ConformanceComponent extends ComponentImpl {
     /**
      * Loads the expected class files into the conformance checker
      */
-    //@Prior
-    public void loadExpected(Map<String, String> config) throws IOException {
+    public void loadExpected() throws IOException {
         Bundle expected = new Bundle(new File(conformance));
         StringWriter output = new StringWriter();
 
@@ -76,12 +76,10 @@ public class ConformanceComponent extends ComponentImpl {
         }
     }
 
-    //@Prior
-    public void loadStructure(Map<String, String> config) {
+    public void loadStructure() {
         expectedFiles = FileLoader.loadFiles(structure);
     }
 
-    //@Pipe(stream = "submissions")
     public Collection files(Collection submission) {
         List<String> missing = new ArrayList<>();
         List<String> extra = new ArrayList<>();
@@ -105,7 +103,7 @@ public class ConformanceComponent extends ComponentImpl {
         return submission;
     }
 
-    //@Pipe(stream = "submissions")
+
     public Collection compare(Collection submission) throws IOException {
         Data data = submission.getResults();
 

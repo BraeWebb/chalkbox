@@ -1,10 +1,12 @@
 package chalkbox2.api;
 
+import java.io.IOException;
+
 public interface Component {
 
-    void init();
+    void init() throws Exception;
 
-    void run();
+    void run(String... args);
 
     void after();
 }
