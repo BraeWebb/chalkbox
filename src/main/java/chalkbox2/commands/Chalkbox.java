@@ -1,10 +1,21 @@
 package chalkbox2.commands;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import chalkbox2.commands.clang.CRoot;
+import chalkbox2.commands.collectors.CollectorsRoot;
+import chalkbox2.commands.general.GeneralRoot;
+import chalkbox2.commands.java.Conformance;
+import chalkbox2.commands.java.JavaRoot;
+import chalkbox2.commands.python.PythonRoot;
+import chalkbox2.commands.util.UtilRoot;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+
+import java.util.Objects;
 
 @Command(name = "chalkbox", sortOptions = false,
         header = {
@@ -30,15 +41,24 @@ import picocli.CommandLine.Parameters;
                 "",
                 "Chalkbox is a MIT licensed project built originally by UQ Students -> UQ Academics.",
                 ""
-            })
+        },
+        subcommands = {
+                Pipeline.class,
+                GeneralRoot.class,
+                UtilRoot.class,
+                JavaRoot.class,
+                PythonRoot.class,
+                CRoot.class,
+                CollectorsRoot.class
+        })
 public class Chalkbox implements Runnable {
+
+    private static final Logger logger = LogManager.getLogger(Conformance.class.getName());
 
     public static void main(String... args) {
         var app = new Chalkbox();
-        int exitCode = new CommandLine(app)
-                .addSubcommand("run", new Pipeline())
-                .execute(args);
-        System.exit(exitCode);
+        logger.debug("Go fuck yourself");
+        System.exit(new CommandLine(app).execute(args));
     }
 
     @Override
