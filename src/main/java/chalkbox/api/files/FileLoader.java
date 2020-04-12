@@ -97,7 +97,7 @@ public class FileLoader {
                 files.addAll(loadFiles(file));
                 continue;
             }
-            
+
             if (file.getName().startsWith(prefix)
                     && file.getName().endsWith(suffix)) {
                 files.add(truncatePath(file));

@@ -48,10 +48,19 @@ public class ConformanceComponent extends ComponentImpl {
     }
 
     public Submission run(Submission submission) throws Exception {
-        submission.createComponent("conformance");
 
-        System.out.println(expectedClasses.toString());
-        System.out.println(load(String.join(File.separator, submissionFolder, submission.getId())).toString());
+        var submissionPath = String.join(File.separator, submissionFolder, submission.getId());
+
+        var submissionFiles = FileLoader.loadFiles(submissionPath);
+        var submissionClasses = load(submissionPath);
+
+        var missing = new ArrayList<>(expectedFiles);
+        missing.removeAll(submissionFiles);
+        var extra = new ArrayList<>(submissionFiles);
+        extra.removeAll(expectedFiles);
+
+        System.out.println(missing);
+        System.out.println(extra);
 
         return submission;
     }

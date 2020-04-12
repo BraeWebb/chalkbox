@@ -1,15 +1,13 @@
 package chalkbox2.api;
 
+import chalkbox.api.collections.Data;
 import com.google.gson.GsonBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public class Submission {
 
-    private String id;
-    public Error error;
-    public Map<String, SubmissionComponent> components = new HashMap<>();
+    private String id = "";
+    private Data data = new Data();
 
 
     public Submission() {
@@ -23,20 +21,12 @@ public class Submission {
         return id;
     }
 
-    public void setError(Error error) {
-        this.error = error;
+    public void loadData(String json) {
+        this.data = new Data(json);
     }
 
-    public Error getError() {
-        return error;
-    }
-
-    public void createComponent(String name) {
-        components.put(name, new SubmissionComponent());
-    }
-
-    public SubmissionComponent getComponent(String name) {
-        return components.get(name);
+    public Data getData() {
+        return data;
     }
 
     @Override
