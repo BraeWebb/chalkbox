@@ -83,7 +83,9 @@ public class Conformance implements Runnable, Loggable {
         try {
             conformancer.init();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger().error("Unable to compile the templates for conformance");
+            logger().fatal(e.getMessage());
+            return;
         }
 
         Flowable.fromIterable(students)                  // From a source list of submissions

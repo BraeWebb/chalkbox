@@ -8,6 +8,7 @@ public class Submission {
 
     private String id = "";
     private Data data = new Data();
+    private boolean failed = false;
 
 
     public Submission() {
@@ -19,6 +20,14 @@ public class Submission {
 
     public String getId() {
         return id;
+    }
+
+    public boolean isFailed() {
+        return failed;
+    }
+
+    public void setFailed(boolean failed) {
+        this.failed = failed;
     }
 
     public void loadData(String json) {

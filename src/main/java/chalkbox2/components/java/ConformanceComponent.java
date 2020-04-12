@@ -4,6 +4,8 @@ import chalkbox.api.collections.Bundle;
 import chalkbox.api.common.java.Compiler;
 import chalkbox.api.files.FileLoader;
 import chalkbox.java.conformance.SourceLoader;
+import chalkbox.java.conformance.comparator.ClassComparator;
+import chalkbox.java.conformance.comparator.CodeComparator;
 import chalkbox2.api.ComponentImpl;
 import chalkbox2.api.Submission;
 
@@ -50,8 +52,18 @@ public class ConformanceComponent extends ComponentImpl {
     public Submission run(Submission submission) throws Exception {
 
         var submissionPath = String.join(File.separator, submissionFolder, submission.getId());
-        var submissionFiles = FileLoader.loadFiles(submissionPath);
-        var submissionClasses = load(submissionPath);
+
+        List<String> submissionFiles = new ArrayList<>();
+        Map<String, Class> submissionClasses = new HashMap<>();
+
+        try {
+            submissionFiles.addAll(FileLoader.loadFiles(submissionPath));
+            submissionClasses.putAll(load(submissionPath));
+        } catch (Exception e) {
+            submission.setFailed(true);
+            submission.getData().set("structure.error", e.toString());
+            return submission;
+        }
 
         var missing = new ArrayList<>(expectedFiles);
         missing.removeAll(submissionFiles);
@@ -60,6 +72,28 @@ public class ConformanceComponent extends ComponentImpl {
 
         submission.getData().set("structure.missing", missing);
         submission.getData().set("structure.extra", extra);
+
+        for (String className : expectedClasses.keySet()) {
+            // Skip anon generated classes
+            if (className.contains("$")) {
+                continue;
+            }
+
+            String jsonKey = "conformance." + className.replace(".", "\\.") + ".";
+            Class expectedClass = expectedClasses.get(className);
+            Class actualClass = submissionClasses.get(className);
+
+            if (expectedClass == null || actualClass == null) {
+                submission.getData().set(jsonKey + "differs", true);
+                submission.getData().set(jsonKey + "output", "Unable to load class");
+                continue;
+            }
+
+            CodeComparator<Class> comparator = new ClassComparator(expectedClass,
+                    actualClass);
+            submission.getData().set(jsonKey + "differs", comparator.hasDifference());
+            submission.getData().set(jsonKey + "output", comparator.toString());
+        }
 
         return submission;
     }
@@ -72,6 +106,11 @@ public class ConformanceComponent extends ComponentImpl {
         //todo: need to introduce the classpath
         Compiler.compile(Compiler.getSourceFiles(expected), "",
                 out.getUnmaskedPath(), output);
+
+        String compilerOutput = output.toString();
+        if (!compilerOutput.isEmpty()) {
+            throw new Exception(compilerOutput);
+        }
 
         SourceLoader expectedLoader = new SourceLoader(out.getUnmaskedPath());
         return expectedLoader.getClassMap();
