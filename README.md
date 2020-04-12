@@ -1,6 +1,6 @@
 # Chalkbox v2 ( WIP )
 
-<img src="https://github.com/BraeWebb/chalkbox/raw/master/resources/chalkbox.png" align="right" alt="Chalkbox Logo">
+<img src="https://github.com/BraeWebb/chalkbox/raw/master/resources/chalkbox.png" alt="Chalkbox Logo">
 
 ## Overview
 Chalkbox is a programming courses dream tool which allows the collection and running of multiple assignments in multiple languages.
