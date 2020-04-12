@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ComponentImpl implements Component, Loggable {
 
@@ -19,6 +20,15 @@ public class ComponentImpl implements Component, Loggable {
     @Override
     public Submission run(Submission submission) throws IOException {
         return submission;
+    }
+
+    @Override
+    public List<Submission> run(List<Submission> submissions) throws Exception {
+        for (var submission : submissions) {
+            run(submission);
+        }
+
+        return submissions;
     }
 
     @Override
