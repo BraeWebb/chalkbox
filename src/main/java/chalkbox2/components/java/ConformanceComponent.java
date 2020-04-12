@@ -2,14 +2,17 @@ package chalkbox2.components.java;
 
 import chalkbox.api.collections.Bundle;
 import chalkbox.api.common.java.Compiler;
+import chalkbox.api.files.FileLoader;
 import chalkbox.java.conformance.SourceLoader;
 import chalkbox2.api.ComponentImpl;
 import chalkbox2.api.Submission;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ConformanceComponent extends ComponentImpl {
@@ -18,7 +21,8 @@ public class ConformanceComponent extends ComponentImpl {
     String templateFolder;
     String submissionFolder;
 
-    private Map<String, Class> expectedClasses;
+    private Map<String, Class> expectedClasses = new HashMap<>();
+    private List<String> expectedFiles = new ArrayList<>();
 
     public ConformanceComponent() {
     }
@@ -39,30 +43,30 @@ public class ConformanceComponent extends ComponentImpl {
     }
 
     public void init() throws Exception {
-        // get the expected file structure
-        // compile the templates so we can test against the submissions
-        loadExpected();
+        expectedClasses.putAll(load(templateFolder));
+        expectedFiles.addAll(FileLoader.loadFiles(templateFolder));
     }
 
-    public Submission run(Submission submission) throws IOException {
+    public Submission run(Submission submission) throws Exception {
         submission.createComponent("conformance");
 
         System.out.println(expectedClasses.toString());
+        System.out.println(load(String.join(File.separator, submissionFolder, submission.getId())).toString());
 
         return submission;
     }
 
-    private void loadExpected() throws Exception {
-        Bundle expected = new Bundle(new File(templateFolder));
+    private Map<String, Class> load(String path) throws Exception {
+        Bundle expected = new Bundle(new File(path));
         StringWriter output = new StringWriter();
-
         Bundle out = new Bundle();
 
+        //todo: need to introduce the classpath
         Compiler.compile(Compiler.getSourceFiles(expected), "",
                 out.getUnmaskedPath(), output);
 
         SourceLoader expectedLoader = new SourceLoader(out.getUnmaskedPath());
-        expectedClasses = expectedLoader.getClassMap();
+        return expectedLoader.getClassMap();
     }
 
 }

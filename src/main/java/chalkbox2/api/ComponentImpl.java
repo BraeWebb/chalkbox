@@ -18,7 +18,7 @@ public class ComponentImpl implements Component, Loggable {
     }
 
     @Override
-    public Submission run(Submission submission) throws IOException {
+    public Submission run(Submission submission) throws IOException, Exception {
         return submission;
     }
 
