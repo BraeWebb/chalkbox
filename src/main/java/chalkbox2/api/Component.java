@@ -6,7 +6,7 @@ public interface Component {
 
     void init() throws Exception;
 
-    void run(String... args);
+    Submission run(Submission submission) throws IOException;
 
     void after();
 }

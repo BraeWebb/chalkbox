@@ -1,6 +1,7 @@
 package chalkbox2.commands.java;
 
 import chalkbox2.api.Loggable;
+import chalkbox2.api.Submission;
 import chalkbox2.components.java.ConformanceComponent;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -52,16 +53,16 @@ public class Conformance implements Runnable, Loggable {
         header();
         logger().info("Starting conformance checking.");
 
-        // todo replace with an input file or scanning a folder
-        // replace with a class instead of a strings
-        var students = new ArrayList<String>();
-        students.add("s123456");
-        students.add("s123456");
-        students.add("s123456");
-        students.add("s999999");
-
+        var students = new ArrayList<Submission>();
+        var student1 = new Submission();
+        student1.setId("s123456");
+        students.add(student1);
 
         ConformanceComponent conformancer = new ConformanceComponent();
+        conformancer.setNoInteraction(noInteraction)
+                .setTemplateFolder(templateFolder)
+                .setSubmissionFolder(submissionFolder);
+
         try {
             conformancer.init();
         } catch (Exception e) {
@@ -73,7 +74,7 @@ public class Conformance implements Runnable, Loggable {
                 .parallel()                              // Multithread it
                 .runOn(Schedulers.computation())         // How many threads ( num of cpus )
                 .filter(this::available)                 // filter out submissions that dont need to be run
-                .map(v -> v + "hello")                   // work to be done
+                .map(conformancer::run)                   // work to be done
                 .sequential()                            // bring back into a single list
                 .blockingSubscribe(System.out::println); // what do we do with that
 
@@ -89,8 +90,8 @@ public class Conformance implements Runnable, Loggable {
         }
     }
 
-    private boolean available(String submission) {
+    private boolean available(Submission submission) {
         // replace with the creation of a set from the limit file and limit options
-        return "s999999".equals(submission);
+        return "s123456".equals(submission.getId());
     }
 }
