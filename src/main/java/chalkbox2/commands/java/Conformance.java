@@ -8,7 +8,13 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Command(
         name = "conformance",
@@ -43,15 +49,26 @@ public class Conformance implements Runnable, Loggable {
     String submissionFolder = "submissions";
 
     @Option(names = "--limit", description = "<Not Implemented> Limit to a single entry.")
-    String limit;
+    String limit = "";
 
     @Option(names = "--limit-file", description = "<Not Implemented> Limit to a list of users in a file.")
-    String limitFile;
+    String limitFile = "";
+
+    // Stores the submissions that we should allow
+    private Set<String> limited = new HashSet<>();
 
     @Override
     public void run() {
         header();
         logger().info("Starting conformance checking.");
+
+        try {
+            logger().info("Loading limits");
+            loadLimit();
+        } catch (IOException e) {
+            logger().error(e.getMessage());
+            logger().fatal("Unable to load limit file.");
+        }
 
         var students = new ArrayList<Submission>();
         var student1 = new Submission();
@@ -80,6 +97,9 @@ public class Conformance implements Runnable, Loggable {
 
     }
 
+    /*
+        Header - Prints out a Little header to stdout.
+     */
     private void header() {
         if (!this.silent) {
             System.out.println();
@@ -90,8 +110,24 @@ public class Conformance implements Runnable, Loggable {
         }
     }
 
+    /*
+        LoadLimit - Adds the limit, and the limit file to the limited user list.
+        @throws: IOException when unable to read file.
+     */
+    private void loadLimit() throws IOException {
+        if (!limit.isEmpty()) {
+            limited.add(limit);
+        }
+        if (!limitFile.isEmpty()) {
+            List<String> lines = Files.readAllLines(Path.of(limitFile));
+            limited.addAll(lines);
+        }
+    }
+
     private boolean available(Submission submission) {
-        // replace with the creation of a set from the limit file and limit options
-        return "s123456".equals(submission.getId());
+        if (limited.isEmpty()) {
+            return true;
+        }
+        return limited.contains(submission.getId());
     }
 }

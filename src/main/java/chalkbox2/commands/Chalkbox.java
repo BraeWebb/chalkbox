@@ -22,7 +22,7 @@ import picocli.CommandLine.Command;
                 "Copyright: Brae Webb and Emily Bennett",
                 ""},
         description = {
-                "Demonstrates picocli subcommands parsing and usage help.",
+                "Assessment assistant for programming subjects.",
             },
         synopsisHeading = "%n",
         descriptionHeading = "%nDescription:%n%n",
@@ -32,8 +32,10 @@ import picocli.CommandLine.Command;
         footer = {
                 "",
                 "",
-                "Chalkbox is a MIT licensed project built originally by UQ Students -> UQ Academics.",
-                ""
+                "Chalkbox is a MIT licensed project built originally by",
+                "the best UQ Academics I have ever had the pleasure",
+                "of working with.",
+                "                                    ~ Evan Hughes"
         },
         subcommands = {
                 Pipeline.class,

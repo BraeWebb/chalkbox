@@ -28,13 +28,6 @@ import picocli.CommandLine.Parameters;
             Conformance.class
         })
 public class JavaRoot implements Runnable {
-
-    public static void main(String... args) {
-        var app = new JavaRoot();
-        int exitCode = new CommandLine(app).execute(args);
-        System.exit(exitCode);
-    }
-
     @Override
     public void run() {
         CommandLine.usage(this, System.err);
