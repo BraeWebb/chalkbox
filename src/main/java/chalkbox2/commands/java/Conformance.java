@@ -93,7 +93,7 @@ public class Conformance implements Runnable, Loggable {
                 .filter(this::available)                 // filter out submissions that dont need to be run
                 .map(conformancer::run)                   // work to be done
                 .sequential()                            // bring back into a single list
-                .blockingSubscribe(System.out::println); // what do we do with that
+                .blockingSubscribe((v) -> System.out.println(v.getData())); // what do we do with that
 
     }
 

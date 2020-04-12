@@ -50,7 +50,6 @@ public class ConformanceComponent extends ComponentImpl {
     public Submission run(Submission submission) throws Exception {
 
         var submissionPath = String.join(File.separator, submissionFolder, submission.getId());
-
         var submissionFiles = FileLoader.loadFiles(submissionPath);
         var submissionClasses = load(submissionPath);
 
@@ -59,8 +58,8 @@ public class ConformanceComponent extends ComponentImpl {
         var extra = new ArrayList<>(submissionFiles);
         extra.removeAll(expectedFiles);
 
-        System.out.println(missing);
-        System.out.println(extra);
+        submission.getData().set("structure.missing", missing);
+        submission.getData().set("structure.extra", extra);
 
         return submission;
     }
