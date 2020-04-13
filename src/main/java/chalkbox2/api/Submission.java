@@ -3,6 +3,9 @@ package chalkbox2.api;
 import chalkbox.api.collections.Data;
 import com.google.gson.GsonBuilder;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 public class Submission {
 
@@ -36,6 +39,15 @@ public class Submission {
 
     public Data getData() {
         return data;
+    }
+
+    public static void save(Submission submission,
+                            String path) throws IOException {
+        var gson = new GsonBuilder().setPrettyPrinting().create();
+        var writer = new FileWriter(path);
+        gson.toJson(submission, writer);
+        writer.flush();
+        writer.close();
     }
 
     @Override

@@ -1,0 +1,16 @@
+{
+  "json": {
+    "conformance": {
+      "Hello": {
+        "output": "class Hello\n    Class methods do not match!\n    Missing: [goodbye]\n    Extra:   []\n\n",
+        "differs": true
+      }
+    },
+    "structure": {
+      "extra": [
+        "src/Billy.java"
+      ],
+      "missing": []
+    }
+  }
+}

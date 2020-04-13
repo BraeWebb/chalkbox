@@ -1,6 +1,7 @@
 package chalkbox2.commands.java;
 
 import chalkbox2.api.Loggable;
+import chalkbox2.api.Saveable;
 import chalkbox2.api.Submission;
 import chalkbox2.components.java.ConformanceComponent;
 import io.reactivex.rxjava3.core.Flowable;
@@ -8,6 +9,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,16 +30,13 @@ import java.util.Set;
         optionListHeading = "%nOptions:%n",
         mixinStandardHelpOptions = true
 )
-public class Conformance implements Runnable, Loggable {
+public class Conformance implements Runnable, Loggable, Saveable {
 
     @Option(names = "--silent", description = "Silences formatting.")
     boolean silent;
 
     @Option(names = "--no-interactive", description = "Silences any warning prompts or user input, assumes defaults.")
     boolean noInteraction;
-
-    @Option(names = "--output-format", description = "Output format to save the results.")
-    String outputFormat = "json";
 
     @Option(names = "--output-folder", description = "Output folder to save the results.")
     String outputFolder = "output";
@@ -93,10 +92,20 @@ public class Conformance implements Runnable, Loggable {
                 .parallel()                              // Multithread it
                 .runOn(Schedulers.computation())         // How many threads ( num of cpus )
                 .filter(this::available)                 // filter out submissions that dont need to be run
-                .map(conformancer::run)                   // work to be done
+                .map(conformancer::run)                  // work to be done
                 .sequential()                            // bring back into a single list
-                .blockingSubscribe(System.out::println); // what do we do with that
-
+                .blockingSubscribe((v) -> {
+                    var submissionPath = String.join(File.separator, outputFolder, v.getId()) + ".json";
+                    try {
+                        logger().info("saving: " + v.getId());
+                        this.save(v, submissionPath, this.noInteraction);
+                        System.out.println("Conformance Checked: " + v.getId());
+                    } catch (Exception e) {
+                        logger().error("Unable to write out this submission: " + v.getId());
+                        logger().error(e.toString());
+                        logger().debug(v.toString());
+                    }
+                });
     }
 
     /*
