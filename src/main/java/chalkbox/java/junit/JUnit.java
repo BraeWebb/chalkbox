@@ -197,7 +197,8 @@ public class JUnit {
 
         Map<String, Integer> passes = new HashMap<>();
         for (String testClass : testClasses) {
-            Data results = JUnitRunner.runTest(testClass, solutionClassPath, working);
+            String classPath = solutionClassPath + ":" + submission.getWorking().getUnmaskedPath();
+            Data results = JUnitRunner.runTest(testClass, classPath, working);
             if (results.get("passes") != null) {
                 passes.put(testClass, Integer.parseInt(results.get("passes").toString()));
             }
