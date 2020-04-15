@@ -4,7 +4,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(
-        name = "Pipeline",
+        name = "pipeline",
         header = "Runs a pipeline of chalkbox operations",
         description = {
                 "Pipelines follow after popular CI/CD flows where a range of steps can be defined with commands.",

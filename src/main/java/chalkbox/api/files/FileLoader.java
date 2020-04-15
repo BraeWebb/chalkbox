@@ -13,6 +13,7 @@ public class FileLoader {
     private String suffix = "";
     private boolean recursive = true;
     private boolean removeSuffix = false;
+    private boolean ignoreHidden = true;
 
     /**
      * Create a file loader with the root folder
@@ -61,6 +62,11 @@ public class FileLoader {
         this.recursive = recursive;
     }
 
+    public FileLoader ignoreHiddenFiles(boolean ignore) {
+        this.ignoreHidden = ignore;
+        return this;
+    }
+
     /**
      * Turn on or off the removal of matching suffixes in resultant paths
      */
@@ -81,9 +87,18 @@ public class FileLoader {
             return files;
         }
         for (File file : subfiles) {
+            // remove hidden files
+            if (hiddenFilter(file)) {
+                continue;
+            }
+
+            // Add nested directories
             if (file.isDirectory() && recursive) {
                 files.addAll(loadFiles(file));
-            } else if (file.getName().startsWith(prefix)
+                continue;
+            }
+
+            if (file.getName().startsWith(prefix)
                     && file.getName().endsWith(suffix)) {
                 files.add(truncatePath(file));
             }
@@ -103,6 +118,15 @@ public class FileLoader {
     }
 
     /**
+     * Recursively load the relative paths of all files in the path
+     */
+    public static List<String> loadFiles(String path) {
+        FileLoader loader = new FileLoader(path);
+
+        return loader.loadFiles(new File(path));
+    }
+
+    /**
      * Utility function to truncate a path relative to root
      */
     private String truncatePath(File path) {
@@ -113,12 +137,7 @@ public class FileLoader {
         return relative;
     }
 
-    /**
-     * Recursively load the relative paths of all files in the path
-     */
-    public static List<String> loadFiles(String path) {
-        FileLoader loader = new FileLoader(path);
-
-        return loader.loadFiles(new File(path));
+    private boolean hiddenFilter(File file) {
+        return this.ignoreHidden && file.getName().startsWith(".");
     }
 }

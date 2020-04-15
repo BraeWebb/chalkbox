@@ -1,10 +1,14 @@
 package chalkbox2.commands;
 
+import chalkbox2.api.Loggable;
+import chalkbox2.commands.clang.CRoot;
+import chalkbox2.commands.collectors.CollectorsRoot;
+import chalkbox2.commands.general.GeneralRoot;
+import chalkbox2.commands.java.JavaRoot;
+import chalkbox2.commands.python.PythonRoot;
+import chalkbox2.commands.util.UtilRoot;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.IVersionProvider;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
 @Command(name = "chalkbox", sortOptions = false,
         header = {
@@ -18,7 +22,7 @@ import picocli.CommandLine.Parameters;
                 "Copyright: Brae Webb and Emily Bennett",
                 ""},
         description = {
-                "Demonstrates picocli subcommands parsing and usage help.",
+                "Assessment assistant for programming subjects.",
             },
         synopsisHeading = "%n",
         descriptionHeading = "%nDescription:%n%n",
@@ -28,17 +32,25 @@ import picocli.CommandLine.Parameters;
         footer = {
                 "",
                 "",
-                "Chalkbox is a MIT licensed project built originally by UQ Students.",
-                ""
-            })
-public class Chalkbox implements Runnable {
+                "Chalkbox is a MIT licensed project built originally by",
+                "the best UQ Academics I have ever had the pleasure",
+                "of working with.",
+                "                                    ~ Evan Hughes"
+        },
+        subcommands = {
+                Pipeline.class,
+                GeneralRoot.class,
+                UtilRoot.class,
+                JavaRoot.class,
+                PythonRoot.class,
+                CRoot.class,
+                CollectorsRoot.class
+        })
+public class Chalkbox implements Runnable, Loggable {
 
     public static void main(String... args) {
         var app = new Chalkbox();
-        int exitCode = new CommandLine(app)
-                .addSubcommand("run", new Pipeline())
-                .execute(args);
-        System.exit(exitCode);
+        System.exit(new CommandLine(app).execute(args));
     }
 
     @Override

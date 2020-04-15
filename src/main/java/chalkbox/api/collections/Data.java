@@ -41,7 +41,7 @@ public class Data {
      * @param data The data to copy
      */
     public Data(Data data) {
-        json = data.json; //TODO: Fix to be an actual copy
+        this(data.json.toJSONString());
     }
 
     /**
