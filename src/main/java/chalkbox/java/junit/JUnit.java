@@ -159,22 +159,42 @@ public class JUnit {
         StringWriter output = new StringWriter();
         StringWriter error = new StringWriter();
 
-        List<SourceFile> files = new ArrayList<>();
+        boolean success = false; // new code
+        /*
+            Used to compile all together - now compiles tests individually
+            to switch back to original functionality - removed lines which are
+            marked new code.
+            uncomment commented out lines
+         */
+        //List<SourceFile> files = new ArrayList<>();
         for (String className : testClasses) {
             String fileName = className.replace(".", "/") + ".java";
+            SourceFile file;
             try {
-                files.add(tests.getFile(fileName));
+                file = tests.getFile(fileName);
+                List<SourceFile> files = new ArrayList<>();
+                files.add(file);
+                //start of new code
+                boolean fileSuccess = Compiler.compile(files,
+                        solutionClassPath,
+                        submission.getWorking().getUnmaskedPath(), output);
+                if (fileSuccess) {
+                    success = true;
+                }
+                //end of new code
                 output.write("JUnit test file " + fileName + " found\n");
             } catch (FileNotFoundException e) {
                 error.write("JUnit test file " + fileName + " not found\n");
             } catch (IOException e) {
                 error.write("IO Compile Error - Please contact course staff\n");
             }
+
         }
 
+        /*
         boolean success = Compiler.compile(files, solutionClassPath,
                 submission.getWorking().getUnmaskedPath(), output);
-
+         */
         submission.getResults().set("junit.compiles", success);
         submission.getResults().set("junit.output", output.toString());
         submission.getResults().set("junit.error", error.toString());
