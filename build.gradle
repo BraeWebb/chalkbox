@@ -5,8 +5,8 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
-sourceCompatibility = 1.13
-targetCompatibility = 1.13
+sourceCompatibility = 1.14
+targetCompatibility = 1.14
 
 repositories {
     mavenCentral()
