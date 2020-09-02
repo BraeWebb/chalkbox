@@ -15,7 +15,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v1
       with:
-        java-version: 13
+        java-version: 14
     - name: Run Gradle Test
       uses: eskatos/gradle-command-action@v1
       with:
